@@ -6,7 +6,6 @@
     <title>StudyFlow - ChatBot Central</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Todo o CSS existente permanece exatamente igual */
         :root {
             --primary: #25D366;
             --primary-dark: #128C7E;
@@ -336,8 +335,6 @@
             transform: scale(1.05);
         }
 
-        /* MELHORIAS PARA AS MENSAGENS */
-        
         .message-content {
             display: flex;
             flex-direction: column;
@@ -628,19 +625,11 @@
             color: var(--dark);
         }
 
-        /* Estilo especial para o botão de reset */
         .action-btn.reset {
             background-color: var(--danger);
             color: white;
-            animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
         .chat-date {
             text-align: center;
             color: var(--gray);
@@ -703,7 +692,6 @@
             to { width: 100% }
         }
 
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -1005,12 +993,6 @@
             }
 
             init() {
-                // Debug da data atual
-                console.log('=== INICIALIZANDO STUDYFLOW ===');
-                console.log('Data do sistema:', new Date());
-                console.log('Data formatada:', this.formatDynamicDate(new Date()));
-                console.log('String da data:', this.getDynamicDateString());
-                
                 this.initTheme();
                 this.initChat();
                 this.initEventListeners();
@@ -1113,13 +1095,9 @@
                         <button class="action-btn info" onclick="chatBot.showHelp()">
                             <i class="fas fa-question-circle"></i> Ajuda
                         </button>
-                        <!-- Botão de debug para desenvolvedor -->
-                        <button class="action-btn" onclick="chatBot.debugModules()" style="background-color: #ff9800; color: white;">
-                            <i class="fas fa-bug"></i> Debug
-                        </button>
-                        <!-- BOTÃO DE RESET TEMPORÁRIO -->
+                        <!-- BOTÃO DE RESET ATUALIZADO -->
                         <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
-                            <i class="fas fa-exclamation-triangle"></i> Reset Dia 19
+                            <i class="fas fa-exclamation-triangle"></i> Reset
                         </button>
                     </div>
                 `;
@@ -1127,28 +1105,18 @@
                 this.addBotMessage(quickActionsHTML, false);
             }
 
-            // FUNÇÃO TEMPORÁRIA: Reset para liberar o dia 19
+            // FUNÇÃO ATUALIZADA: Reset para módulo Chatbot
             showResetConfirmation() {
-                const hoje = this.getDynamicDateString();
                 const confirmationHTML = `
                     <div class="message-card">
                         <div class="message-card-header">
                             <i class="fas fa-exclamation-triangle" style="color: var(--danger)"></i>
-                            <div class="message-card-title">Reset Temporário - Liberar Dia 19</div>
+                            <div class="message-card-title">Reset Temporário</div>
                         </div>
                         <div class="message-card-content">
                             <div class="message-alert message-alert-danger">
                                 <i class="fas fa-exclamation-circle"></i>
-                                <div><strong>Atenção!</strong> Esta função é temporária e deve ser usada apenas para liberar o dia 19.</div>
-                            </div>
-                            <div class="message-text">
-                                <p>Esta ação irá:</p>
-                                <ul style="margin: 10px 0; padding-left: 20px;">
-                                    <li>Resetar o registro de atividades do dia <strong>${hoje}</strong></li>
-                                    <li>Permitir que você visualize as tarefas reais do dia</li>
-                                    <li>Não afetar outros módulos do sistema</li>
-                                </ul>
-                                <p>Depois de usar esta função, o sistema voltará a funcionar normalmente.</p>
+                                <div><strong>Atenção!</strong> Esta função executa um reset temporário do módulo do Chatbot, útil para corrigir travamentos ou inconsistências nos dados do dia. Nenhum outro módulo será afetado. Deseja continuar?</div>
                             </div>
                             <div class="quick-actions">
                                 <button class="action-btn reset" onclick="chatBot.resetChatbotData()">
@@ -1165,9 +1133,10 @@
                 this.addBotMessage(confirmationHTML, false);
             }
 
-            // FUNÇÃO TEMPORÁRIA: Reset dos dados do chatbot
+            // FUNÇÃO ATUALIZADA: Reset dos dados do chatbot
             resetChatbotData() {
-                const hoje = this.getDynamicDateString();
+                const hoje = new Date();
+                const hojeStr = hoje.toLocaleDateString('pt-BR');
                 
                 // Limpar apenas os dados específicos do chatbot que estão bloqueando o dia
                 localStorage.removeItem('lastRegisterDate');
@@ -1183,7 +1152,7 @@
                         <div class="message-card-content">
                             <div class="message-alert message-alert-success">
                                 <i class="fas fa-check-circle"></i>
-                                <div><strong>Reset realizado com sucesso!</strong> O dia ${hoje} foi liberado.</div>
+                                <div><strong>Reset realizado com sucesso!</strong> Dados do módulo Chatbot reiniciados em ${hojeStr}.</div>
                             </div>
                             <div class="message-text">
                                 Agora você pode visualizar e registrar as atividades reais do dia.
@@ -1202,12 +1171,6 @@
                 `;
                 
                 this.addBotMessage(successHTML, false);
-                
-                // Log para debug
-                console.log('=== RESET DO CHATBOT APLICADO ===');
-                console.log('Data atual:', hoje);
-                console.log('lastRegisterDate após reset:', localStorage.getItem('lastRegisterDate'));
-                console.log('dailyActivities após reset:', localStorage.getItem('dailyActivities'));
             }
 
             // CORREÇÃO PARA O PROBLEMA DA DATA - FUNÇÕES NOVAS
@@ -1248,8 +1211,6 @@
                 const hoje = this.getDynamicDateObject(); // SEMPRE usa data dinâmica
                 const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
                 
-                console.log('Data atual do sistema:', hojeStr); // Debug
-                
                 // CORREÇÃO APLICADA: Verificar se já registrou atividades HOJE usando a nova função
                 if (this.hasRegisteredToday()) {
                     // Já registrou hoje - mostrar resumo do que foi feito
@@ -1281,7 +1242,7 @@
                 // Obter matérias do ciclo - COM MÚLTIPLAS MATÉRIAS
                 const materiasCiclo = this.getTodaySubjects();
 
-                // Obter baralhos do Anki
+                // CORREÇÃO APLICADA: Obter baralhos do Anki ATUALIZADOS
                 const baralhosAnki = this.getTodayDecks();
 
                 // Construir o card de resumo pendente com nova formatação
@@ -1396,17 +1357,34 @@
                 
                 summaryHTML += `</div>`;
 
-                // Anki
+                // Anki - CORREÇÃO APLICADA: Usar baralhos atualizados
                 summaryHTML += `
                     <div class="message-section">
                         <div class="message-section-title">Baralhos Anki</div>
                         <div class="message-list">
+                `;
+                
+                if (baralhosAnki.length > 0) {
+                    baralhosAnki.forEach(deck => {
+                        summaryHTML += `
                             <div class="message-list-item">
                                 <div class="message-list-icon"><i class="fas fa-layer-group"></i></div>
                                 <div class="message-list-content">
-                                    <div class="message-list-title">${baralhosAnki.length > 0 ? baralhosAnki.join(', ') : 'Nenhum baralho programado'}</div>
+                                    <div class="message-list-title">${deck}</div>
                                 </div>
                             </div>
+                        `;
+                    });
+                } else {
+                    summaryHTML += `
+                        <div class="message-alert message-alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>Nenhum baralho programado para hoje</div>
+                        </div>
+                    `;
+                }
+                
+                summaryHTML += `
                         </div>
                     </div>
                 `;
@@ -1578,8 +1556,6 @@
             openRegisterModal() {
                 const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
                 
-                console.log('Abrindo modal - Data atual:', hojeStr); // Debug
-                
                 // CORREÇÃO APLICADA: Verificar se já registrou HOJE usando a nova função
                 if (this.hasRegisteredToday()) {
                     this.typeMessage("Você já registrou suas atividades hoje! 😊\n\nSe quiser ver o resumo do que foi feito, peça o <strong>resumo do dia</strong>.");
@@ -1624,9 +1600,51 @@
                 }
             }
 
-            // [TODO O RESTO DO CÓDIGO PERMANECE EXATAMENTE IGUAL]
-            // Funções de utilitário, Simulados, Edital, Registrar, etc.
-            // ... (todo o resto do código permanece inalterado)
+            // CORREÇÃO APLICADA: Função para obter baralhos do Anki atualizados
+            getTodayDecks() {
+                const ankiData = this.getModuleData('ciclos_focus_v1');
+                if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
+                
+                const perDay = ankiData.perDay;
+                const blockIndex = ankiData.blockIndex || 0;
+                
+                // Calcular os baralhos do dia atual baseado no blockIndex atual
+                const startIndex = blockIndex * perDay;
+                const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
+                
+                // Retornar apenas os nomes dos baralhos
+                return todayDecks.map(deck => deck.name);
+            }
+
+            // CORREÇÃO APLICADA: Função para obter tarefas do dia atualizada
+            getTodayTasks() {
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
+                const tasks = {
+                    questoes: [],
+                    anki: [],
+                    teoria: []
+                };
+
+                // Buscar assuntos para questões de hoje (revisão) - APENAS AS DO DIA
+                tasks.questoes = this.calculateTodayReviews();
+                
+                // CORREÇÃO APLICADA: Buscar baralhos do Anki para hoje (atualizados)
+                tasks.anki = this.getTodayDecks().map(deckName => ({
+                    id: deckName,
+                    nome: deckName,
+                    emoji: '🔁'
+                }));
+
+                // Buscar matérias de teoria para hoje (ciclo teórico) - COM MÚLTIPLAS MATÉRIAS
+                const activeCycle = this.getActiveCycle();
+                if (activeCycle && activeCycle.generatedCycle) {
+                    // Obter as próximas matérias baseado na configuração
+                    tasks.teoria = this.getTodaySubjects();
+                }
+
+                return tasks;
+            }
 
             addMessageToChat(content, isUser = false, timestamp = null, messageId = null) {
                 // Verificar se a mensagem já foi exibida (evitar duplicação)
@@ -1863,7 +1881,7 @@
                     this.showEditalMenu();
                 } else if (lowerMessage.includes('simulado')) {
                     this.showSimuladosMenu();
-                } else if (lowerMessage.includes('reset') || lowerMessage.includes('liberar')) {
+                } else if (lowerMessage.includes('reset')) {
                     this.showResetConfirmation();
                 } else {
                     // Resposta padrão
@@ -1939,8 +1957,8 @@
                                 <div class="message-list-item">
                                     <div class="message-list-icon"><i class="fas fa-exclamation-triangle"></i></div>
                                     <div class="message-list-content">
-                                        <div class="message-list-title">Reset Dia 19</div>
-                                        <div class="message-list-description">Função temporária para liberar o dia 19</div>
+                                        <div class="message-list-title">Reset</div>
+                                        <div class="message-list-description">Função temporária para corrigir travamentos</div>
                                     </div>
                                 </div>
                             </div>
@@ -2028,9 +2046,9 @@
                         <button class="action-btn info" onclick="chatBot.showInfo()">
                             <i class="fas fa-info"></i> Informações
                         </button>
-                        <!-- BOTÃO DE RESET TEMPORÁRIO -->
+                        <!-- BOTÃO DE RESET ATUALIZADO -->
                         <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
-                            <i class="fas fa-exclamation-triangle"></i> Reset Dia 19
+                            <i class="fas fa-exclamation-triangle"></i> Reset
                         </button>
                     </div>
                 `, false);
@@ -2053,10 +2071,6 @@
                 input.value += emoji;
                 input.focus();
             }
-
-            // ==================================================================
-            // FUNÇÕES PARA OS MÓDULOS EDITAL E SIMULADOS (PERMANECEM INTACTAS)
-            // ==================================================================
 
             // Funções para o módulo Edital
             showEditalMenu() {
@@ -2784,43 +2798,6 @@
                 modalBody.innerHTML = tasksHTML;
             }
 
-            getTodayTasks() {
-                const hoje = new Date();
-                const hojeStr = hoje.toISOString().split('T')[0];
-                const tasks = {
-                    questoes: [],
-                    anki: [],
-                    teoria: []
-                };
-
-                // Buscar assuntos para questões de hoje (revisão) - APENAS AS DO DIA
-                // Usando o mesmo algoritmo do módulo de revisões
-                tasks.questoes = this.calculateTodayReviews();
-                
-                // Buscar baralhos do Anki para hoje
-                const ankiData = this.getModuleData('ciclos_focus_v1');
-                if (ankiData && ankiData.decks) {
-                    const perDay = ankiData.perDay || 3;
-                    const blockIndex = ankiData.blockIndex || 0;
-                    const startIndex = blockIndex * perDay;
-                    const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
-                    tasks.anki = todayDecks.map(deck => ({
-                        id: deck.id,
-                        nome: deck.name,
-                        emoji: deck.emoji
-                    }));
-                }
-
-                // Buscar matérias de teoria para hoje (ciclo teórico) - COM MÚLTIPLAS MATÉRIAS
-                const activeCycle = this.getActiveCycle();
-                if (activeCycle && activeCycle.generatedCycle) {
-                    // Obter as próximas matérias baseado na configuração
-                    tasks.teoria = this.getTodaySubjects();
-                }
-
-                return tasks;
-            }
-
             createQuestaoCard(questao) {
                 return `
                     <div class="task-card" data-type="questoes" data-id="${questao.id}">
@@ -3170,329 +3147,6 @@
                     .slice(0, 3);
             }
 
-            // ==================================================================
-            // FUNÇÕES DE INTEGRAÇÃO ESPECÍFICAS
-            // ==================================================================
-
-            // Função para atualizar o módulo de revisões (questões)
-            updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade) {
-                const disciplines = this.getModuleData('disciplines') || [];
-                const hoje = new Date().getTime();
-                
-                // Encontrar o assunto específico
-                let assuntoEncontrado = null;
-                let disciplinaEncontrada = null;
-                
-                for (const disciplina of disciplines) {
-                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
-                        for (const assunto of disciplina.assuntos) {
-                            if (assunto.nome === assuntoId) {
-                                assuntoEncontrado = assunto;
-                                disciplinaEncontrada = disciplina;
-                                break;
-                            }
-                        }
-                        if (assuntoEncontrado) break;
-                    }
-                }
-                
-                if (assuntoEncontrado) {
-                    // Atualizar estatísticas
-                    assuntoEncontrado.questions = (assuntoEncontrado.questions || 0) + parseInt(feitas);
-                    assuntoEncontrado.correct = (assuntoEncontrado.correct || 0) + parseInt(corretas);
-                    assuntoEncontrado.incorrect = (assuntoEncontrado.incorrect || 0) + (parseInt(feitas) - parseInt(corretas));
-                    
-                    // Adicionar dificuldade ao histórico
-                    if (!assuntoEncontrado.difficultyHistory) {
-                        assuntoEncontrado.difficultyHistory = [];
-                    }
-                    assuntoEncontrado.difficultyHistory.push(parseInt(dificuldade));
-                    
-                    // Calcular acurácia
-                    const accuracy = (parseInt(corretas) / parseInt(feitas)) * 100;
-                    
-                    // Determinar o método de revisão
-                    if (assuntoEncontrado.reviewMethod === 'fixed') {
-                        // Revisão por desempenho - usar a função do módulo de revisões
-                        const interval = this.getPerformanceBasedInterval(accuracy);
-                        assuntoEncontrado.interval = interval;
-                        assuntoEncontrado.repetitions = (assuntoEncontrado.repetitions || 0) + 1;
-                    } else {
-                        // SM-2 - usar a função do módulo de revisões
-                        const result = this.calculateNextReviewSM2(
-                            parseInt(dificuldade),
-                            assuntoEncontrado.easeFactor || 2.5,
-                            assuntoEncontrado.interval || 1,
-                            assuntoEncontrado.repetitions || 0
-                        );
-                        
-                        assuntoEncontrado.easeFactor = result.newEF;
-                        assuntoEncontrado.interval = result.newInterval;
-                        assuntoEncontrado.repetitions = result.repetitions;
-                    }
-                    
-                    // Atualizar datas
-                    assuntoEncontrado.lastReviewed = hoje;
-                    
-                    // Calcular próxima data de revisão
-                    const nextReviewDate = new Date(hoje);
-                    nextReviewDate.setDate(nextReviewDate.getDate() + assuntoEncontrado.interval);
-                    assuntoEncontrado.nextReviewDate = nextReviewDate.getTime();
-                    
-                    // Calcular força da memória
-                    assuntoEncontrado.memoryStrength = this.calculateMemoryStrength(assuntoEncontrado);
-                    
-                    // Salvar de volta no localStorage
-                    this.setModuleData('disciplines', disciplines);
-                    
-                    console.log('Módulo de revisões atualizado para:', assuntoId);
-                    return true;
-                } else {
-                    console.warn('Assunto não encontrado no módulo de revisões:', assuntoId);
-                    return false;
-                }
-            }
-
-            // Função para atualizar o ciclo de estudos (matérias teóricas)
-            updateStudyCycle(materiaId, tempo) {
-                const activeCycle = this.getActiveCycle();
-                const hoje = new Date().toISOString().split('T')[0]; // Data no formato YYYY-MM-DD
-
-                if (activeCycle && activeCycle.generatedCycle) {
-                    const todayIndex = activeCycle.currentDay || 0;
-                    const cycleLength = activeCycle.generatedCycle.length;
-
-                    // Encontrar a matéria no ciclo atual
-                    let materiaEncontrada = activeCycle.generatedCycle[todayIndex % cycleLength];
-
-                    // Se for um array (múltiplas matérias no mesmo dia), verificar se a matéria está presente
-                    if (Array.isArray(materiaEncontrada)) {
-                        if (materiaEncontrada.includes(materiaId)) {
-                            materiaEncontrada = materiaId;
-                        } else {
-                            materiaEncontrada = null;
-                        }
-                    } else {
-                        if (materiaEncontrada !== materiaId) {
-                            materiaEncontrada = null;
-                        }
-                    }
-
-                    if (materiaEncontrada) {
-                        // Marcar como estudada no dia atual
-                        if (!activeCycle.completedSubjects) {
-                            activeCycle.completedSubjects = {};
-                        }
-                        activeCycle.completedSubjects[todayIndex] = true;
-
-                        // Avançar para o próximo dia apenas se ainda não avançou hoje
-                        if (activeCycle.lastAdvanced !== hoje) {
-                            activeCycle.currentDay = (todayIndex + 1) % cycleLength;
-                            activeCycle.lastAdvanced = hoje;
-                        }
-
-                        // Atualizar estatísticas de progresso
-                        if (!activeCycle.studyTime) {
-                            activeCycle.studyTime = {};
-                        }
-                        // Usar a data como chave para o tempo de estudo
-                        activeCycle.studyTime[hoje] = (activeCycle.studyTime[hoje] || 0) + parseInt(tempo);
-
-                        // Salvar de volta
-                        this.setModuleData('StudyFlow_activeCycle', activeCycle);
-
-                        console.log('Ciclo de estudos atualizado para:', materiaId);
-                        return true;
-                    }
-                }
-
-                console.warn('Ciclo de estudos não encontrado ou matéria não localizada');
-                return false;
-            }
-
-            // FUNÇÕES DO MÓDULO DE REVISÕES (copiadas do código fornecido)
-
-            // Função para calcular intervalo baseado em desempenho
-            getPerformanceBasedInterval(accuracy) {
-                accuracy = Math.max(0, Math.min(100, accuracy));
-                
-                if (accuracy >= 100) return 30;
-                if (accuracy >= 80) return 25;
-                if (accuracy >= 60) return 15;
-                if (accuracy >= 40) return 7;
-                return 3;
-            }
-
-            // Algoritmo SM-2
-            calculateNextReviewSM2(q, currentEF, currentInterval, repetitions) {
-                let newEF = currentEF + (0.1 - (3 - q) * (0.08 + (3 - q) * 0.02));
-                newEF = Math.max(1.3, Math.min(newEF, 2.5));
-                let newInterval;
-                if (q < 2) {
-                    newInterval = 1;
-                    repetitions = 0;
-                } else {
-                    if (repetitions === 0) {
-                        newInterval = 1;
-                    } else if (repetitions === 1) {
-                        newInterval = 3;
-                    } else {
-                        newInterval = Math.round(currentInterval * newEF);
-                    }
-                    repetitions++;
-                }
-                return { newInterval, newEF, repetitions };
-            }
-
-            // Função para calcular força da memória
-            calculateMemoryStrength(topic) {
-                if (!topic.lastReviewed) return 0.5;
-                
-                const now = this.getToday();
-                const lastReview = topic.lastReviewed;
-                
-                const diffTime = Math.max(0, now - lastReview);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                const baseStrength = 0.9;
-                const decayRate = 0.15;
-                let strength = baseStrength * Math.exp(-decayRate * diffDays);
-                
-                if (topic.difficultyHistory && topic.difficultyHistory.length > 0) {
-                    const avgDifficulty = topic.difficultyHistory.reduce((a, b) => a + b, 0) / topic.difficultyHistory.length;
-                    strength *= (1 - (avgDifficulty * 0.15));
-                }
-                
-                return Math.min(Math.max(strength, 0.1), 0.95);
-            }
-
-            // Função para obter timestamp do dia atual
-            getToday() {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return today.getTime();
-            }
-
-            // MODIFICAÇÕES NAS FUNÇÕES EXISTENTES
-
-            // Modificar saveQuestoes para usar a nova função de integração
-            saveQuestoes(assuntoId, feitas, erradas, tempo) {
-                const corretas = parseInt(feitas) - parseInt(erradas);
-                const dificuldade = 2; // Valor padrão (Bom) - poderia ser capturado do usuário
-                
-                // Atualizar módulo de revisões
-                const revisaoAtualizada = this.updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade);
-                
-                if (revisaoAtualizada) {
-                    // Atualizar módulo home (mantendo o funcionamento atual)
-                    let dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
-                    dailyCompletedReviews += 1;
-                    this.setModuleData('dailyCompletedReviews', dailyCompletedReviews);
-
-                    const hoje = new Date();
-                    this.setModuleData('lastReviewDate', hoje.toISOString().split('T')[0]);
-
-                    this.registerHomeSession(`Questões - ${assuntoId}`, parseInt(tempo));
-                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
-                    
-                    console.log('Questões registradas com sucesso em todos os módulos');
-                } else {
-                    console.error('Falha ao registrar questões no módulo de revisões');
-                }
-            }
-
-            // Modificar saveTeoria para usar a nova função de integração
-            saveTeoria(materiaId, conteudo, pagina, tempo) {
-                // Atualizar ciclo de estudos
-                const cicloAtualizado = this.updateStudyCycle(materiaId, tempo);
-                
-                if (cicloAtualizado) {
-                    // Registrar sessão no módulo Home (mantendo o funcionamento atual)
-                    this.registerHomeSession(`Teoria - ${materiaId}`, parseInt(tempo));
-
-                    // Salvar progresso da teoria
-                    const teoriaProgress = this.getModuleData('teoriaProgress') || {};
-                    teoriaProgress[materiaId] = {
-                        conteudo: conteudo,
-                        pagina: pagina,
-                        ultimaAtualizacao: new Date().toISOString()
-                    };
-                    this.setModuleData('teoriaProgress', teoriaProgress);
-
-                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
-                    
-                    console.log('Teoria registrada com sucesso em todos os módulos');
-                } else {
-                    console.error('Falha ao registrar teoria no ciclo de estudos');
-                }
-            }
-
-            saveAnki(deckId, tempo, cards) {
-                // Registrar sessão no módulo Home
-                const ankiData = this.getModuleData('ciclos_focus_v1');
-                const deck = ankiData && ankiData.decks ? ankiData.decks.find(d => d.id === deckId) : null;
-                const deckNome = deck ? deck.name : deckId;
-
-                this.registerHomeSession(`Anki - ${deckNome}`, parseInt(tempo));
-
-                // Atualizar último estudo
-                localStorage.setItem('ultimoEstudo', new Date().toISOString());
-            }
-
-            // Adicionar esta função para debug - verificar se os dados estão sendo salvos
-            debugModules() {
-                console.log('=== DEBUG DOS MÓDULOS ===');
-                
-                // Verificar módulo de revisões
-                const disciplines = this.getModuleData('disciplines');
-                console.log('Módulo Revisões (disciplines):', disciplines);
-                
-                // Verificar ciclo de estudos
-                const activeCycle = this.getActiveCycle();
-                console.log('Ciclo Ativo:', activeCycle);
-                
-                // Verificar módulo home
-                const hoje = new Date();
-                const dateKey = `sessions-${hoje.getDate()}-${hoje.getMonth()+1}-${hoje.getFullYear()}`;
-                const homeSessions = this.getModuleData(dateKey);
-                console.log('Módulo Home (sessões):', homeSessions);
-                
-                // Verificar módulo de edital
-                const editalData = this.getEditalData();
-                console.log('Módulo Edital:', editalData);
-                
-                // Verificar módulo de simulados
-                const simuladosData = this.getSimuladosData();
-                console.log('Módulo Simulados:', simuladosData);
-                
-                console.log('=== FIM DEBUG ===');
-
-                // Mostrar resumo no chat
-                this.addBotMessage(`
-                    <div class="message-card">
-                        <div class="message-card-header">
-                            <i class="fas fa-bug"></i>
-                            <div class="message-card-title">Debug dos Módulos</div>
-                        </div>
-                        <div class="message-card-content">
-                            <div class="message-text">
-                                <strong>Módulo Revisões:</strong> ${disciplines ? disciplines.length : 0} disciplinas<br>
-                                <strong>Ciclo Ativo:</strong> ${activeCycle ? 'Encontrado' : 'Não encontrado'}<br>
-                                <strong>Sessões Hoje:</strong> ${homeSessions ? homeSessions.length : 0}<br>
-                                <strong>Edital:</strong> ${editalData ? 'Encontrado' : 'Não encontrado'}<br>
-                                <strong>Simulados:</strong> ${simuladosData ? simuladosData.simulados.length : 0} realizados<br>
-                                <br>
-                                Verifique o console para detalhes.
-                            </div>
-                        </div>
-                    </div>
-                `, false);
-            }
-
-            // ==================================================================
-            // FIM DAS FUNÇÕES DE INTEGRAÇÃO
-            // ==================================================================
-
             // Funções de utilitário
             toggleTheme() {
                 if (this.currentTheme === 'light') {
@@ -3529,13 +3183,11 @@
                         if (Array.isArray(data) && data.length > 0) {
                             const cycle = data[0];
                             if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
-                                console.log('Ciclo encontrado em:', key, cycle);
                                 return cycle;
                             }
                         }
                         // Se for um objeto direto
                         else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
-                            console.log('Ciclo encontrado em:', key, data);
                             return data;
                         }
                     }
@@ -3552,13 +3204,11 @@
                                 if (Array.isArray(data) && data.length > 0) {
                                     const cycle = data[0];
                                     if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
-                                        console.log('Ciclo encontrado em:', key, cycle);
                                         return cycle;
                                     }
                                 }
                                 // Se for um objeto direto
                                 else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
-                                    console.log('Ciclo encontrado em:', key, data);
                                     return data;
                                 }
                             }
@@ -3568,7 +3218,6 @@
                     }
                 }
                 
-                console.log('Não foi possível encontrar um ciclo ativo.');
                 return null;
             }
 
@@ -3675,7 +3324,6 @@
             getTodaySubjects() {
                 const activeCycle = this.getActiveCycle();
                 if (!activeCycle || !activeCycle.generatedCycle) {
-                    console.log('Ciclo ativo não encontrado ou sem generatedCycle');
                     return [];
                 }
                 
@@ -3683,19 +3331,8 @@
                 const materiasPorDia = this.materiasPorDia || 1;
                 let subjects = [];
                 
-                console.log('Ciclo encontrado:', activeCycle);
-                console.log('Dia atual:', todayIndex);
-                console.log('Matérias por dia:', materiasPorDia);
-                
-                // Se o ciclo não tiver generatedCycle, retornar array vazio
-                if (!activeCycle.generatedCycle || !Array.isArray(activeCycle.generatedCycle)) {
-                    console.log('GeneratedCycle não encontrado ou não é array');
-                    return [];
-                }
-                
                 const cycleLength = activeCycle.generatedCycle.length;
                 if (cycleLength === 0) {
-                    console.log('GeneratedCycle está vazio');
                     return [];
                 }
                 
@@ -3718,22 +3355,254 @@
                     }
                 }
                 
-                console.log('Matérias encontradas para hoje:', subjects);
                 return subjects;
             }
 
-            getTodayDecks() {
+            saveQuestoes(assuntoId, feitas, erradas, tempo) {
+                const corretas = parseInt(feitas) - parseInt(erradas);
+                const dificuldade = 2; // Valor padrão (Bom) - poderia ser capturado do usuário
+                
+                // Atualizar módulo de revisões
+                const revisaoAtualizada = this.updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade);
+                
+                if (revisaoAtualizada) {
+                    // Atualizar módulo home (mantendo o funcionamento atual)
+                    let dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+                    dailyCompletedReviews += 1;
+                    this.setModuleData('dailyCompletedReviews', dailyCompletedReviews);
+
+                    const hoje = new Date();
+                    this.setModuleData('lastReviewDate', hoje.toISOString().split('T')[0]);
+
+                    this.registerHomeSession(`Questões - ${assuntoId}`, parseInt(tempo));
+                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
+                }
+            }
+
+            saveTeoria(materiaId, conteudo, pagina, tempo) {
+                // Atualizar ciclo de estudos
+                const cicloAtualizado = this.updateStudyCycle(materiaId, tempo);
+                
+                if (cicloAtualizado) {
+                    // Registrar sessão no módulo Home (mantendo o funcionamento atual)
+                    this.registerHomeSession(`Teoria - ${materiaId}`, parseInt(tempo));
+
+                    // Salvar progresso da teoria
+                    const teoriaProgress = this.getModuleData('teoriaProgress') || {};
+                    teoriaProgress[materiaId] = {
+                        conteudo: conteudo,
+                        pagina: pagina,
+                        ultimaAtualizacao: new Date().toISOString()
+                    };
+                    this.setModuleData('teoriaProgress', teoriaProgress);
+
+                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
+                }
+            }
+
+            saveAnki(deckId, tempo, cards) {
+                // Registrar sessão no módulo Home
                 const ankiData = this.getModuleData('ciclos_focus_v1');
-                if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
+                const deck = ankiData && ankiData.decks ? ankiData.decks.find(d => d.id === deckId) : null;
+                const deckNome = deck ? deck.name : deckId;
+
+                this.registerHomeSession(`Anki - ${deckNome}`, parseInt(tempo));
+
+                // Atualizar último estudo
+                localStorage.setItem('ultimoEstudo', new Date().toISOString());
+            }
+
+            // Função para atualizar o módulo de revisões (questões)
+            updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade) {
+                const disciplines = this.getModuleData('disciplines') || [];
+                const hoje = new Date().getTime();
                 
-                const perDay = ankiData.perDay;
-                const blockIndex = ankiData.blockIndex || 0;
+                // Encontrar o assunto específico
+                let assuntoEncontrado = null;
+                let disciplinaEncontrada = null;
                 
-                // Simular quais baralhos devem ser revisados hoje
-                const startIndex = blockIndex * perDay;
-                const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
+                for (const disciplina of disciplines) {
+                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+                        for (const assunto of disciplina.assuntos) {
+                            if (assunto.nome === assuntoId) {
+                                assuntoEncontrado = assunto;
+                                disciplinaEncontrada = disciplina;
+                                break;
+                            }
+                        }
+                        if (assuntoEncontrado) break;
+                    }
+                }
                 
-                return todayDecks.map(deck => deck.name);
+                if (assuntoEncontrado) {
+                    // Atualizar estatísticas
+                    assuntoEncontrado.questions = (assuntoEncontrado.questions || 0) + parseInt(feitas);
+                    assuntoEncontrado.correct = (assuntoEncontrado.correct || 0) + parseInt(corretas);
+                    assuntoEncontrado.incorrect = (assuntoEncontrado.incorrect || 0) + (parseInt(feitas) - parseInt(corretas));
+                    
+                    // Adicionar dificuldade ao histórico
+                    if (!assuntoEncontrado.difficultyHistory) {
+                        assuntoEncontrado.difficultyHistory = [];
+                    }
+                    assuntoEncontrado.difficultyHistory.push(parseInt(dificuldade));
+                    
+                    // Calcular acurácia
+                    const accuracy = (parseInt(corretas) / parseInt(feitas)) * 100;
+                    
+                    // Determinar o método de revisão
+                    if (assuntoEncontrado.reviewMethod === 'fixed') {
+                        // Revisão por desempenho - usar a função do módulo de revisões
+                        const interval = this.getPerformanceBasedInterval(accuracy);
+                        assuntoEncontrado.interval = interval;
+                        assuntoEncontrado.repetitions = (assuntoEncontrado.repetitions || 0) + 1;
+                    } else {
+                        // SM-2 - usar a função do módulo de revisões
+                        const result = this.calculateNextReviewSM2(
+                            parseInt(dificuldade),
+                            assuntoEncontrado.easeFactor || 2.5,
+                            assuntoEncontrado.interval || 1,
+                            assuntoEncontrado.repetitions || 0
+                        );
+                        
+                        assuntoEncontrado.easeFactor = result.newEF;
+                        assuntoEncontrado.interval = result.newInterval;
+                        assuntoEncontrado.repetitions = result.repetitions;
+                    }
+                    
+                    // Atualizar datas
+                    assuntoEncontrado.lastReviewed = hoje;
+                    
+                    // Calcular próxima data de revisão
+                    const nextReviewDate = new Date(hoje);
+                    nextReviewDate.setDate(nextReviewDate.getDate() + assuntoEncontrado.interval);
+                    assuntoEncontrado.nextReviewDate = nextReviewDate.getTime();
+                    
+                    // Calcular força da memória
+                    assuntoEncontrado.memoryStrength = this.calculateMemoryStrength(assuntoEncontrado);
+                    
+                    // Salvar de volta no localStorage
+                    this.setModuleData('disciplines', disciplines);
+                    
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            // Função para atualizar o ciclo de estudos (matérias teóricas)
+            updateStudyCycle(materiaId, tempo) {
+                const activeCycle = this.getActiveCycle();
+                const hoje = new Date().toISOString().split('T')[0]; // Data no formato YYYY-MM-DD
+
+                if (activeCycle && activeCycle.generatedCycle) {
+                    const todayIndex = activeCycle.currentDay || 0;
+                    const cycleLength = activeCycle.generatedCycle.length;
+
+                    // Encontrar a matéria no ciclo atual
+                    let materiaEncontrada = activeCycle.generatedCycle[todayIndex % cycleLength];
+
+                    // Se for um array (múltiplas matérias no mesmo dia), verificar se a matéria está presente
+                    if (Array.isArray(materiaEncontrada)) {
+                        if (materiaEncontrada.includes(materiaId)) {
+                            materiaEncontrada = materiaId;
+                        } else {
+                            materiaEncontrada = null;
+                        }
+                    } else {
+                        if (materiaEncontrada !== materiaId) {
+                            materiaEncontrada = null;
+                        }
+                    }
+
+                    if (materiaEncontrada) {
+                        // Marcar como estudada no dia atual
+                        if (!activeCycle.completedSubjects) {
+                            activeCycle.completedSubjects = {};
+                        }
+                        activeCycle.completedSubjects[todayIndex] = true;
+
+                        // Avançar para o próximo dia apenas se ainda não avançou hoje
+                        if (activeCycle.lastAdvanced !== hoje) {
+                            activeCycle.currentDay = (todayIndex + 1) % cycleLength;
+                            activeCycle.lastAdvanced = hoje;
+                        }
+
+                        // Atualizar estatísticas de progresso
+                        if (!activeCycle.studyTime) {
+                            activeCycle.studyTime = {};
+                        }
+                        // Usar a data como chave para o tempo de estudo
+                        activeCycle.studyTime[hoje] = (activeCycle.studyTime[hoje] || 0) + parseInt(tempo);
+
+                        // Salvar de volta
+                        this.setModuleData('StudyFlow_activeCycle', activeCycle);
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            // Função para calcular intervalo baseado em desempenho
+            getPerformanceBasedInterval(accuracy) {
+                accuracy = Math.max(0, Math.min(100, accuracy));
+                
+                if (accuracy >= 100) return 30;
+                if (accuracy >= 80) return 25;
+                if (accuracy >= 60) return 15;
+                if (accuracy >= 40) return 7;
+                return 3;
+            }
+
+            // Algoritmo SM-2
+            calculateNextReviewSM2(q, currentEF, currentInterval, repetitions) {
+                let newEF = currentEF + (0.1 - (3 - q) * (0.08 + (3 - q) * 0.02));
+                newEF = Math.max(1.3, Math.min(newEF, 2.5));
+                let newInterval;
+                if (q < 2) {
+                    newInterval = 1;
+                    repetitions = 0;
+                } else {
+                    if (repetitions === 0) {
+                        newInterval = 1;
+                    } else if (repetitions === 1) {
+                        newInterval = 3;
+                    } else {
+                        newInterval = Math.round(currentInterval * newEF);
+                    }
+                    repetitions++;
+                }
+                return { newInterval, newEF, repetitions };
+            }
+
+            // Função para calcular força da memória
+            calculateMemoryStrength(topic) {
+                if (!topic.lastReviewed) return 0.5;
+                
+                const now = this.getToday();
+                const lastReview = topic.lastReviewed;
+                
+                const diffTime = Math.max(0, now - lastReview);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                const baseStrength = 0.9;
+                const decayRate = 0.15;
+                let strength = baseStrength * Math.exp(-decayRate * diffDays);
+                
+                if (topic.difficultyHistory && topic.difficultyHistory.length > 0) {
+                    const avgDifficulty = topic.difficultyHistory.reduce((a, b) => a + b, 0) / topic.difficultyHistory.length;
+                    strength *= (1 - (avgDifficulty * 0.15));
+                }
+                
+                return Math.min(Math.max(strength, 0.1), 0.95);
+            }
+
+            // Função para obter timestamp do dia atual
+            getToday() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return today.getTime();
             }
 
             registerHomeSession(subject, minutes) {
