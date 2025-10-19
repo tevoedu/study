@@ -6,7 +6,7 @@
     <title>StudyFlow - ChatBot Central</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Todo o CSS existente permanece EXATAMENTE IGUAL */
+        /* Todo o CSS existente permanece exatamente igual */
         :root {
             --primary: #25D366;
             --primary-dark: #128C7E;
@@ -627,6 +627,19 @@
             background-color: var(--light-gray);
             color: var(--dark);
         }
+
+        /* Estilo especial para o botão de reset */
+        .action-btn.reset {
+            background-color: var(--danger);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
         
         .chat-date {
             text-align: center;
@@ -984,7 +997,7 @@
                 this.init();
             }
 
-            // FUNÇÃO CORRIGIDA - Agora sempre usa a data atual do sistema
+            // FUNÇÃO ADICIONADA PARA CORRIGIR O ERRO
             formatTime(date) {
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -1104,9 +1117,9 @@
                         <button class="action-btn" onclick="chatBot.debugModules()" style="background-color: #ff9800; color: white;">
                             <i class="fas fa-bug"></i> Debug
                         </button>
-                        <!-- BOTÃO DE RESET TEMPORÁRIO PARA LIBERAR DIA 19 -->
-                        <button class="action-btn" onclick="chatBot.resetChatbotData()" style="background-color: #f44336; color: white;">
-                            <i class="fas fa-sync-alt"></i> Resetar Dia (Emergência)
+                        <!-- BOTÃO DE RESET TEMPORÁRIO -->
+                        <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
+                            <i class="fas fa-exclamation-triangle"></i> Reset Dia 19
                         </button>
                     </div>
                 `;
@@ -1114,9 +1127,92 @@
                 this.addBotMessage(quickActionsHTML, false);
             }
 
-            // CORREÇÃO APLICADA: FUNÇÕES SEMPRE USAM DATA DINÂMICA DO SISTEMA
+            // FUNÇÃO TEMPORÁRIA: Reset para liberar o dia 19
+            showResetConfirmation() {
+                const hoje = this.getDynamicDateString();
+                const confirmationHTML = `
+                    <div class="message-card">
+                        <div class="message-card-header">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--danger)"></i>
+                            <div class="message-card-title">Reset Temporário - Liberar Dia 19</div>
+                        </div>
+                        <div class="message-card-content">
+                            <div class="message-alert message-alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div><strong>Atenção!</strong> Esta função é temporária e deve ser usada apenas para liberar o dia 19.</div>
+                            </div>
+                            <div class="message-text">
+                                <p>Esta ação irá:</p>
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li>Resetar o registro de atividades do dia <strong>${hoje}</strong></li>
+                                    <li>Permitir que você visualize as tarefas reais do dia</li>
+                                    <li>Não afetar outros módulos do sistema</li>
+                                </ul>
+                                <p>Depois de usar esta função, o sistema voltará a funcionar normalmente.</p>
+                            </div>
+                            <div class="quick-actions">
+                                <button class="action-btn reset" onclick="chatBot.resetChatbotData()">
+                                    <i class="fas fa-sync-alt"></i> Confirmar Reset
+                                </button>
+                                <button class="action-btn info" onclick="chatBot.addBotMessage('Reset cancelado. O sistema permanece inalterado.', false)">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                this.addBotMessage(confirmationHTML, false);
+            }
+
+            // FUNÇÃO TEMPORÁRIA: Reset dos dados do chatbot
+            resetChatbotData() {
+                const hoje = this.getDynamicDateString();
+                
+                // Limpar apenas os dados específicos do chatbot que estão bloqueando o dia
+                localStorage.removeItem('lastRegisterDate');
+                localStorage.removeItem('dailyActivities');
+                
+                // Mensagem de confirmação
+                const successHTML = `
+                    <div class="message-card">
+                        <div class="message-card-header">
+                            <i class="fas fa-check-circle" style="color: var(--success)"></i>
+                            <div class="message-card-title">Reset Concluído</div>
+                        </div>
+                        <div class="message-card-content">
+                            <div class="message-alert message-alert-success">
+                                <i class="fas fa-check-circle"></i>
+                                <div><strong>Reset realizado com sucesso!</strong> O dia ${hoje} foi liberado.</div>
+                            </div>
+                            <div class="message-text">
+                                Agora você pode visualizar e registrar as atividades reais do dia.
+                                O sistema voltará a funcionar normalmente a partir de amanhã.
+                            </div>
+                            <div class="quick-actions">
+                                <button class="action-btn primary" onclick="chatBot.showDailySummary()">
+                                    <i class="fas fa-calendar-day"></i> Ver Resumo do Dia
+                                </button>
+                                <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
+                                    <i class="fas fa-plus-circle"></i> Registrar Atividades
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                this.addBotMessage(successHTML, false);
+                
+                // Log para debug
+                console.log('=== RESET DO CHATBOT APLICADO ===');
+                console.log('Data atual:', hoje);
+                console.log('lastRegisterDate após reset:', localStorage.getItem('lastRegisterDate'));
+                console.log('dailyActivities após reset:', localStorage.getItem('dailyActivities'));
+            }
+
+            // CORREÇÃO PARA O PROBLEMA DA DATA - FUNÇÕES NOVAS
             getDynamicDateString() {
-                // SEMPRE retorna a data atual do sistema - CORREÇÃO APLICADA
+                // SEMPRE retorna a data atual do sistema
                 const hoje = new Date();
                 const year = hoje.getFullYear();
                 const month = String(hoje.getMonth() + 1).padStart(2, '0');
@@ -1125,29 +1221,37 @@
             }
 
             getDynamicDateObject() {
-                // SEMPRE retorna o objeto Date atual - CORREÇÃO APLICADA
+                // SEMPRE retorna o objeto Date atual
                 return new Date();
             }
 
             formatDynamicDate(date) {
-                // Formata a data para exibição - CORREÇÃO APLICADA
+                // Formata a data para exibição
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return date.toLocaleDateString('pt-BR', options);
             }
 
-            // CORREÇÃO APLICADA: showDailySummary agora sempre usa data dinâmica
+            // CORREÇÃO APLICADA: Função para verificar se uma data é hoje
+            isToday(dateString) {
+                const hoje = this.getDynamicDateString();
+                return dateString === hoje;
+            }
+
+            // CORREÇÃO APLICADA: Função para verificar se já registrou atividades HOJE
+            hasRegisteredToday() {
+                const lastRegisterDate = localStorage.getItem('lastRegisterDate');
+                return lastRegisterDate && this.isToday(lastRegisterDate);
+            }
+
+            // MODIFICAR A FUNÇÃO showDailySummary (substituir a existente)
             showDailySummary() {
                 const hoje = this.getDynamicDateObject(); // SEMPRE usa data dinâmica
                 const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
                 
                 console.log('Data atual do sistema:', hojeStr); // Debug
                 
-                // Verificar se já registrou atividades HOJE (data dinâmica)
-                const lastRegisterDate = localStorage.getItem('lastRegisterDate');
-                
-                console.log('Último registro:', lastRegisterDate); // Debug
-                
-                if (lastRegisterDate === hojeStr) {
+                // CORREÇÃO APLICADA: Verificar se já registrou atividades HOJE usando a nova função
+                if (this.hasRegisteredToday()) {
                     // Já registrou hoje - mostrar resumo do que foi feito
                     this.showTodaySummary(hojeStr);
                 } else {
@@ -1156,7 +1260,7 @@
                 }
             }
 
-            // CORREÇÃO APLICADA: showPendingTasks agora sempre usa data dinâmica
+            // MODIFICAR A FUNÇÃO showPendingTasks (substituir a existente)
             showPendingTasks(hojeStr) {
                 const hoje = new Date(hojeStr + 'T00:00:00'); // Converte para objeto Date
                 const dataFormatada = this.formatDynamicDate(hoje); // Usa formatação dinâmica
@@ -1349,7 +1453,7 @@
                 }, 500);
             }
 
-            // CORREÇÃO APLICADA: showTodaySummary agora sempre usa data dinâmica
+            // MODIFICAR A FUNÇÃO showTodaySummary (substituir a existente)
             showTodaySummary(hojeStr) {
                 const hoje = new Date(hojeStr + 'T00:00:00'); // Converte para objeto Date
                 const dataFormatada = this.formatDynamicDate(hoje); // Usa formatação dinâmica
@@ -1470,15 +1574,14 @@
                 }, 500);
             }
 
-            // CORREÇÃO APLICADA: openRegisterModal agora sempre usa data dinâmica
+            // MODIFICAR A FUNÇÃO openRegisterModal (substituir a existente)
             openRegisterModal() {
                 const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
-                const lastRegisterDate = localStorage.getItem('lastRegisterDate');
                 
-                console.log('Abrindo modal - Data atual:', hojeStr, 'Último registro:', lastRegisterDate); // Debug
+                console.log('Abrindo modal - Data atual:', hojeStr); // Debug
                 
-                // Verificar se já registrou HOJE (data dinâmica)
-                if (lastRegisterDate === hojeStr) {
+                // CORREÇÃO APLICADA: Verificar se já registrou HOJE usando a nova função
+                if (this.hasRegisteredToday()) {
                     this.typeMessage("Você já registrou suas atividades hoje! 😊\n\nSe quiser ver o resumo do que foi feito, peça o <strong>resumo do dia</strong>.");
                     return;
                 }
@@ -1487,7 +1590,7 @@
                 this.loadTodayTasks();
             }
 
-            // CORREÇÃO APLICADA: addDateDivider agora sempre usa data dinâmica
+            // MODIFICAR A FUNÇÃO addDateDivider (substituir a existente)
             addDateDivider() {
                 const hoje = this.getDynamicDateObject(); // SEMPRE usa data atual
                 const dataFormatada = this.formatDynamicDate(hoje);
@@ -1497,44 +1600,6 @@
                 dateDiv.className = 'chat-date';
                 dateDiv.innerHTML = `<span>${dataFormatada}</span>`;
                 chatMessages.appendChild(dateDiv);
-            }
-
-            // FUNÇÃO TEMPORÁRIA DE RESET PARA LIBERAR DIA 19
-            resetChatbotData() {
-                const hojeStr = this.getDynamicDateString();
-                console.log('=== INICIANDO RESET DO CHATBOT ===');
-                console.log('Data atual:', hojeStr);
-                
-                // Verificar se realmente precisa do reset (se o dia atual está bloqueado)
-                const lastRegisterDate = localStorage.getItem('lastRegisterDate');
-                const dailyActivities = JSON.parse(localStorage.getItem('dailyActivities')) || {};
-                
-                console.log('Último registro:', lastRegisterDate);
-                console.log('Atividades salvas:', dailyActivities);
-                
-                if (lastRegisterDate === hojeStr) {
-                    // Confirmar com o usuário
-                    if (confirm(`⚠️ ATENÇÃO: Você está prestes a resetar os dados do dia ${hojeStr}.\n\nIsso permitirá que você registre novas atividades hoje, mas os dados atuais serão perdidos.\n\nDeseja continuar?`)) {
-                        // Remover apenas os dados específicos do chatbot que estão bloqueando o dia
-                        localStorage.removeItem('lastRegisterDate');
-                        localStorage.removeItem('dailyActivities');
-                        
-                        console.log('Dados do chatbot resetados com sucesso!');
-                        
-                        // Mostrar mensagem de sucesso
-                        this.typeMessage(`✅ Reset concluído! O dia ${hojeStr} foi liberado para novos registros.`);
-                        
-                        // Fechar modal se estiver aberto
-                        this.closeRegisterModal();
-                        
-                        // Atualizar o resumo para mostrar as tarefas pendentes
-                        setTimeout(() => {
-                            this.showDailySummary();
-                        }, 1000);
-                    }
-                } else {
-                    this.typeMessage(`ℹ️ O dia ${hojeStr} já está livre para registro. Não é necessário reset.`);
-                }
             }
 
             // Modal de configuração
@@ -1559,502 +1624,434 @@
                 }
             }
 
-            // CORREÇÃO CRÍTICA: saveAllTasks agora sempre usa data dinâmica
-            saveAllTasks() {
-                const cards = document.querySelectorAll('.task-card');
-                let hasError = false;
-                let savedCount = 0;
-                let totalTime = 0;
-                let activities = {
-                    questoes: [],
-                    anki: [],
-                    teoria: []
-                };
+            // [TODO O RESTO DO CÓDIGO PERMANECE EXATAMENTE IGUAL]
+            // Funções de utilitário, Simulados, Edital, Registrar, etc.
+            // ... (todo o resto do código permanece inalterado)
 
-                cards.forEach(card => {
-                    const type = card.getAttribute('data-type');
-                    const id = card.getAttribute('data-id');
-
-                    if (type === 'questoes') {
-                        const feitas = document.getElementById(`questoes-feitas-${id}`).value;
-                        const erradas = document.getElementById(`questoes-erradas-${id}`).value;
-                        const tempo = document.getElementById(`questoes-tempo-${id}`).value;
-
-                        if (!feitas || !tempo) {
-                            hasError = true;
-                            card.style.border = '1px solid red';
-                        } else {
-                            card.style.border = '';
-                            this.saveQuestoes(id, feitas, erradas, tempo);
-                            savedCount++;
-                            totalTime += parseInt(tempo);
-                            activities.questoes.push({
-                                assunto: id,
-                                feitas: parseInt(feitas),
-                                erradas: parseInt(erradas),
-                                tempo: parseInt(tempo)
-                            });
-                        }
-                    } else if (type === 'anki') {
-                        const tempo = document.getElementById(`anki-tempo-${id}`).value;
-                        const cards = document.getElementById(`anki-cards-${id}`).value;
-
-                        if (!tempo || !cards) {
-                            hasError = true;
-                            card.style.border = '1px solid red';
-                        } else {
-                            card.style.border = '';
-                            this.saveAnki(id, tempo, cards);
-                            savedCount++;
-                            totalTime += parseInt(tempo);
-                            activities.anki.push({
-                                deck: id,
-                                tempo: parseInt(tempo),
-                                cards: parseInt(cards)
-                            });
-                        }
-                    } else if (type === 'teoria') {
-                        const conteudo = document.getElementById(`teoria-conteudo-${id}`).value;
-                        const pagina = document.getElementById(`teoria-pagina-${id}`).value;
-                        const tempo = document.getElementById(`teoria-tempo-${id}`).value;
-
-                        if (!tempo) {
-                            hasError = true;
-                            card.style.border = '1px solid red';
-                        } else {
-                            card.style.border = '';
-                            this.saveTeoria(id, conteudo, pagina, tempo);
-                            savedCount++;
-                            totalTime += parseInt(tempo);
-                            activities.teoria.push({
-                                materia: id,
-                                conteudo: conteudo,
-                                pagina: pagina,
-                                tempo: parseInt(tempo)
-                            });
-                        }
-                    }
-                });
-
-                if (hasError) {
-                    alert('Preencha todos os campos obrigatórios!');
+            addMessageToChat(content, isUser = false, timestamp = null, messageId = null) {
+                // Verificar se a mensagem já foi exibida (evitar duplicação)
+                if (messageId && this.messageIds.has(messageId)) {
                     return;
                 }
-
-                // CORREÇÃO CRÍTICA: Sempre usar data dinâmica do sistema
-                const hojeStr = this.getDynamicDateString(); // Usa data dinâmica
-                localStorage.setItem('lastRegisterDate', hojeStr);
                 
-                // Salvar as atividades do dia
-                const dailyActivities = {
-                    date: hojeStr,
-                    activities: activities
-                };
-                localStorage.setItem('dailyActivities', JSON.stringify(dailyActivities));
-
-                this.closeRegisterModal();
-                
-                if (savedCount > 0) {
-                    this.showRegistrationSummary(savedCount, totalTime, activities);
+                if (messageId) {
+                    this.messageIds.add(messageId);
                 }
+                
+                const chatMessages = document.getElementById('chatMessages');
+                const messageContainer = document.createElement('div');
+                messageContainer.className = `message-container ${isUser ? 'user-container' : 'bot-container'}`;
+                
+                if (!isUser) {
+                    const avatar = document.createElement('div');
+                    avatar.className = 'avatar bot-avatar-small';
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                    messageContainer.appendChild(avatar);
+                }
+                
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `message-bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`;
+                
+                // Processar markdown simples (substituir *texto* por <strong>texto</strong>)
+                const processedContent = this.parseMarkdown(content);
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = processedContent;
+                
+                const messageTime = document.createElement('div');
+                messageTime.className = 'bubble-time';
+                messageTime.textContent = timestamp ? this.formatTime(new Date(timestamp)) : this.formatTime(new Date());
+                
+                messageBubble.appendChild(messageContent);
+                messageBubble.appendChild(messageTime);
+                
+                // Adicionar reação para mensagens do usuário
+                if (isUser) {
+                    const reaction = document.createElement('div');
+                    reaction.className = 'message-reaction';
+                    reaction.innerHTML = '<span class="reaction-icon"><i class="fas fa-check-double"></i></span>';
+                    messageBubble.appendChild(reaction);
+                }
+                
+                messageContainer.appendChild(messageBubble);
+                
+                if (isUser) {
+                    const avatar = document.createElement('div');
+                    avatar.className = 'avatar user-avatar-small';
+                    avatar.innerHTML = '<i class="fas fa-user"></i>';
+                    messageContainer.appendChild(avatar);
+                }
+                
+                chatMessages.appendChild(messageContainer);
+                
+                // Scroll para a última mensagem
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Salvar no histórico (limitado a 3 mensagens)
+                this.chatHistory.push({
+                    content: content,
+                    isUser: isUser,
+                    timestamp: timestamp || new Date().toISOString()
+                });
+                
+                // Manter apenas as últimas 3 mensagens
+                if (this.chatHistory.length > 3) {
+                    this.chatHistory = this.chatHistory.slice(-3);
+                }
+                
+                localStorage.setItem('chatHistory', JSON.stringify(this.chatHistory));
             }
 
-            // CORREÇÃO APLICADA: checkAlerts agora sempre usa data dinâmica
-            checkAlerts() {
-                const alertas = [];
-                const hoje = new Date();
-                const hojeStr = this.getDynamicDateString(); // Usa data dinâmica
-                
-                // Verificar revisões atrasadas
-                const revisoesAtrasadas = this.calculateOverdueReviews();
-                
-                if (revisoesAtrasadas > 0) {
-                    alertas.push({
-                        tipo: 'alert-danger',
-                        icone: 'exclamation-triangle',
-                        mensagem: `Você tem ${revisoesAtrasadas} revisões atrasadas!`
-                    });
-                }
-                
-                // Verificar meta diária
-                const dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
-                const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
-                
-                // Verificar se é um novo dia
-                const lastReviewDate = this.getModuleData('lastReviewDate');
-                
-                if (lastReviewDate !== hojeStr) {
-                    // Resetar contador diário se for um novo dia
-                    this.setModuleData('dailyCompletedReviews', 0);
-                    this.setModuleData('lastReviewDate', hojeStr);
-                } else if (dailyCompletedReviews < dailyReviewGoal / 2) {
-                    alertas.push({
-                        tipo: 'alert-warning',
-                        icone: 'bullseye',
-                        mensagem: `Você completou apenas ${dailyCompletedReviews} de ${dailyReviewGoal} revisões hoje.`
-                    });
-                }
-                
-                // Verificar dias sem estudo (simulação)
-                const ultimoEstudo = localStorage.getItem('ultimoEstudo');
-                if (ultimoEstudo) {
-                    const diasSemEstudo = Math.floor((hoje - new Date(ultimoEstudo)) / (1000 * 60 * 60 * 24));
-                    if (diasSemEstudo >= 2) {
-                        alertas.push({
-                            tipo: 'alert-danger',
-                            icone: 'calendar-times',
-                            mensagem: `Você não estuda há ${diasSemEstudo} dias!`
-                        });
-                    }
-                }
-                
-                return alertas;
+            // Função para parsear markdown simples
+            parseMarkdown(text) {
+                // Substituir *texto* por <strong>texto</strong>
+                return text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
             }
 
-            // CORREÇÃO APLICADA: saveQuestoes agora sempre usa data dinâmica
-            saveQuestoes(assuntoId, feitas, erradas, tempo) {
-                const corretas = parseInt(feitas) - parseInt(erradas);
-                const dificuldade = 2; // Valor padrão (Bom) - poderia ser capturado do usuário
-                
-                // Atualizar módulo de revisões
-                const revisaoAtualizada = this.updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade);
-                
-                if (revisaoAtualizada) {
-                    // Atualizar módulo home (mantendo o funcionamento atual)
-                    let dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
-                    dailyCompletedReviews += 1;
-                    this.setModuleData('dailyCompletedReviews', dailyCompletedReviews);
-
-                    // CORREÇÃO: Usar data dinâmica
-                    this.setModuleData('lastReviewDate', this.getDynamicDateString());
-
-                    this.registerHomeSession(`Questões - ${assuntoId}`, parseInt(tempo));
-                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
-                    
-                    console.log('Questões registradas com sucesso em todos os módulos');
+            addBotMessage(content, saveToHistory = true, messageId = null) {
+                if (saveToHistory) {
+                    this.addMessageToChat(content, false, null, messageId);
                 } else {
-                    console.error('Falha ao registrar questões no módulo de revisões');
+                    // Não salva no histórico para mensagens de interface
+                    const chatMessages = document.getElementById('chatMessages');
+                    const messageContainer = document.createElement('div');
+                    messageContainer.className = 'message-container bot-container';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'avatar bot-avatar-small';
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                    messageContainer.appendChild(avatar);
+                    
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message-bubble bot-bubble';
+                    
+                    // Processar markdown
+                    const processedContent = this.parseMarkdown(content);
+                    
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    messageContent.innerHTML = processedContent;
+                    
+                    const messageTime = document.createElement('div');
+                    messageTime.className = 'bubble-time';
+                    messageTime.textContent = this.formatTime(new Date());
+                    
+                    messageBubble.appendChild(messageContent);
+                    messageBubble.appendChild(messageTime);
+                    messageContainer.appendChild(messageBubble);
+                    
+                    chatMessages.appendChild(messageContainer);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
             }
 
-            // CORREÇÃO APLICADA: updateStudyCycle agora sempre usa data dinâmica
-            updateStudyCycle(materiaId, tempo) {
-                const activeCycle = this.getActiveCycle();
-                const hojeStr = this.getDynamicDateString(); // CORREÇÃO: Usar data dinâmica
-
-                if (activeCycle && activeCycle.generatedCycle) {
-                    const todayIndex = activeCycle.currentDay || 0;
-                    const cycleLength = activeCycle.generatedCycle.length;
-
-                    // Encontrar a matéria no ciclo atual
-                    let materiaEncontrada = activeCycle.generatedCycle[todayIndex % cycleLength];
-
-                    // Se for um array (múltiplas matérias no mesmo dia), verificar se a matéria está presente
-                    if (Array.isArray(materiaEncontrada)) {
-                        if (materiaEncontrada.includes(materiaId)) {
-                            materiaEncontrada = materiaId;
-                        } else {
-                            materiaEncontrada = null;
-                        }
-                    } else {
-                        if (materiaEncontrada !== materiaId) {
-                            materiaEncontrada = null;
-                        }
-                    }
-
-                    if (materiaEncontrada) {
-                        // Marcar como estudada no dia atual
-                        if (!activeCycle.completedSubjects) {
-                            activeCycle.completedSubjects = {};
-                        }
-                        activeCycle.completedSubjects[todayIndex] = true;
-
-                        // Avançar para o próximo dia apenas se ainda não avançou hoje
-                        if (activeCycle.lastAdvanced !== hojeStr) {
-                            activeCycle.currentDay = (todayIndex + 1) % cycleLength;
-                            activeCycle.lastAdvanced = hojeStr;
-                        }
-
-                        // Atualizar estatísticas de progresso
-                        if (!activeCycle.studyTime) {
-                            activeCycle.studyTime = {};
-                        }
-                        // Usar a data como chave para o tempo de estudo
-                        activeCycle.studyTime[hojeStr] = (activeCycle.studyTime[hojeStr] || 0) + parseInt(tempo);
-
-                        // Salvar de volta
-                        this.setModuleData('StudyFlow_activeCycle', activeCycle);
-
-                        console.log('Ciclo de estudos atualizado para:', materiaId);
-                        return true;
-                    }
+            typeMessage(text, callback = null, messageId = null) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageContainer = document.createElement('div');
+                messageContainer.className = 'message-container bot-container';
+                
+                const avatar = document.createElement('div');
+                    avatar.className = 'avatar bot-avatar-small';
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                    messageContainer.appendChild(avatar);
+                    
+                const messageBubble = document.createElement('div');
+                messageBubble.className = 'message-bubble bot-bubble';
+                
+                // Processar markdown
+                const processedText = this.parseMarkdown(text);
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = `<span class="typing-text">${processedText}</span>`;
+                
+                const messageTime = document.createElement('div');
+                messageTime.className = 'bubble-time';
+                messageTime.textContent = this.formatTime(new Date());
+                
+                messageBubble.appendChild(messageContent);
+                messageBubble.appendChild(messageTime);
+                messageContainer.appendChild(messageBubble);
+                
+                chatMessages.appendChild(messageContainer);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Salvar no histórico - CORRIGIDO
+                this.chatHistory.push({
+                    content: text,
+                    isUser: false,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Manter apenas as últimas 3 mensagens
+                if (this.chatHistory.length > 3) {
+                    this.chatHistory = this.chatHistory.slice(-3);
                 }
-
-                console.warn('Ciclo de estudos não encontrado ou matéria não localizada');
-                return false;
+                
+                localStorage.setItem('chatHistory', JSON.stringify(this.chatHistory));
+                
+                // Chamar callback após a animação
+                if (callback) {
+                    setTimeout(callback, text.length * 30 + 300);
+                }
             }
 
-            // [TODO O RESTO DO CÓDIGO PERMANECE EXATAMENTE IGUAL]
-            // Todas as outras funções são mantidas intactas conforme solicitado
-            
-            // ... (todo o restante do código permanece exatamente igual)
-            
-            // Funções de utilitário
-            toggleTheme() {
-                if (this.currentTheme === 'light') {
-                    document.body.classList.add('dark-theme');
-                    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
-                    this.currentTheme = 'dark';
+            showTypingIndicator() {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageContainer = document.createElement('div');
+                messageContainer.className = 'message-container bot-container';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar bot-avatar-small';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                messageContainer.appendChild(avatar);
+                
+                const typingBubble = document.createElement('div');
+                typingBubble.className = 'typing-indicator';
+                typingBubble.id = 'typingIndicator';
+                
+                typingBubble.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                
+                messageContainer.appendChild(typingBubble);
+                chatMessages.appendChild(messageContainer);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.parentElement.remove();
+                }
+            }
+
+            sendMessage() {
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addUserMessage(message);
+                    input.value = '';
+                    
+                    // Simular resposta do bot
+                    this.showTypingIndicator();
+                    setTimeout(() => {
+                        this.hideTypingIndicator();
+                        this.processUserMessage(message);
+                    }, 1000 + Math.random() * 1000);
+                }
+            }
+
+            processUserMessage(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                if (lowerMessage.includes('resumo') || lowerMessage.includes('como estou') || lowerMessage.includes('tarefas')) {
+                    this.showDailySummary();
+                } else if (lowerMessage.includes('registrar') || lowerMessage.includes('adicionar')) {
+                    this.openRegisterModal();
+                } else if (lowerMessage.includes('configurar') || lowerMessage.includes('config')) {
+                    this.showConfigModal();
+                } else if (lowerMessage.includes('ajuda') || lowerMessage.includes('comandos')) {
+                    this.showHelp();
+                } else if (lowerMessage.includes('info') || lowerMessage.includes('sobre')) {
+                    this.showInfo();
+                } else if (lowerMessage.includes('edital')) {
+                    this.showEditalMenu();
+                } else if (lowerMessage.includes('simulado')) {
+                    this.showSimuladosMenu();
+                } else if (lowerMessage.includes('reset') || lowerMessage.includes('liberar')) {
+                    this.showResetConfirmation();
                 } else {
-                    document.body.classList.remove('dark-theme');
-                    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
-                    this.currentTheme = 'light';
-                }
-                localStorage.setItem('theme', this.currentTheme);
-            }
-
-            addUserMessage(content) {
-                this.addMessageToChat(content, true);
-            }
-
-            // Buscar ciclo ativo de forma robusta
-            getActiveCycle() {
-                // Tentar diferentes chaves possíveis para o ciclo ativo
-                const possibleKeys = [
-                    'StudyFlow_activeCycle',
-                    'StudyFlow_allCycles',
-                    'activeCycle',
-                    'StudyFlow_cycle',
-                    'currentCycle'
-                ];
-                
-                for (const key of possibleKeys) {
-                    const data = this.getModuleData(key);
-                    if (data) {
-                        // Se for um array (como StudyFlow_allCycles), pegar o primeiro ciclo
-                        if (Array.isArray(data) && data.length > 0) {
-                            const cycle = data[0];
-                            if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
-                                console.log('Ciclo encontrado em:', key, cycle);
-                                return cycle;
-                            }
-                        }
-                        // Se for um objeto direto
-                        else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
-                            console.log('Ciclo encontrado em:', key, data);
-                            return data;
-                        }
-                    }
-                }
-                
-                // Se não encontrou, tentar buscar em todas as chaves do localStorage
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && (key.includes('cycle') || key.includes('Cycle') || key.includes('CYCLE'))) {
-                        try {
-                            const data = JSON.parse(localStorage.getItem(key));
-                            if (data) {
-                                // Se for um array, pegar o primeiro item
-                                if (Array.isArray(data) && data.length > 0) {
-                                    const cycle = data[0];
-                                    if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
-                                        console.log('Ciclo encontrado em:', key, cycle);
-                                        return cycle;
-                                    }
-                                }
-                                // Se for um objeto direto
-                                else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
-                                    console.log('Ciclo encontrado em:', key, data);
-                                    return data;
-                                }
-                            }
-                        } catch (e) {
-                            // Ignorar chaves que não são JSON válido
-                        }
-                    }
-                }
-                
-                console.log('Não foi possível encontrar um ciclo ativo.');
-                return null;
-            }
-
-            // Funções de integração com módulos
-            getModuleData(key) {
-                try {
-                    const data = localStorage.getItem(key);
-                    return data ? JSON.parse(data) : null;
-                } catch (e) {
-                    console.error(`Erro ao carregar dados do módulo: ${key}`, e);
-                    return null;
+                    // Resposta padrão
+                    this.typeMessage("Entendi sua mensagem! Posso te ajudar com:\n\n• <strong>Resumo do dia</strong>\n• <strong>Registrar atividades</strong>\n• <strong>Edital</strong>\n• <strong>Simulados</strong>\n• <strong>Configurações</strong>\n• <strong>Ajuda e informações</strong>\n\nO que você gostaria de fazer?");
                 }
             }
 
-            setModuleData(key, data) {
-                try {
-                    localStorage.setItem(key, JSON.stringify(data));
-                    return true;
-                } catch (e) {
-                    console.error(`Erro ao salvar dados no módulo: ${key}`, e);
-                    return false;
-                }
-            }
-
-            // ALGORITMO DE PRIORIZAÇÃO IDÊNTICO AO MÓDULO DE REVISÕES
-            calculateTodayReviews() {
-                const disciplines = this.getModuleData('disciplines');
-                const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
-                
-                if (!disciplines || !Array.isArray(disciplines)) return [];
-                
-                const hoje = new Date();
-                const todayTimestamp = hoje.getTime();
-                let pendingTopics = [];
-                
-                // Fase 1: Coletar todos os assuntos pendentes
-                disciplines.forEach(disciplina => {
-                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
-                        disciplina.assuntos.forEach(assunto => {
-                            // Ignorar assuntos suspensos
-                            if (assunto.suspended) return;
-                            
-                            // Verificar se está na data de revisão ou atrasado
-                            if (assunto.nextReviewDate && assunto.nextReviewDate <= todayTimestamp) {
-                                // Calcular dias de atraso
-                                const daysOverdue = Math.max(0, Math.floor((todayTimestamp - assunto.nextReviewDate) / (1000 * 60 * 60 * 24)));
+            showHelp() {
+                const helpCard = `
+                    <div class="message-card">
+                        <div class="message-card-header">
+                            <i class="fas fa-question-circle"></i>
+                            <div class="message-card-title">Como posso ajudá-lo?</div>
+                        </div>
+                        <div class="message-card-content">
+                            <div class="message-list">
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-calendar-day"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Resumo do dia</div>
+                                        <div class="message-list-description">Mostrar tarefas e progresso atual</div>
+                                    </div>
+                                </div>
                                 
-                                // Calcular dificuldade média (invertida: maior dificuldade = maior prioridade)
-                                let avgDifficulty = 2; // padrão
-                                if (assunto.difficultyHistory && assunto.difficultyHistory.length > 0) {
-                                    avgDifficulty = assunto.difficultyHistory.reduce((a, b) => a + b, 0) / assunto.difficultyHistory.length;
-                                }
-                                const difficultyScore = (3 - avgDifficulty); // Inverte a escala
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-plus-circle"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Registrar atividades</div>
+                                        <div class="message-list-description">Questões, Anki ou teoria</div>
+                                    </div>
+                                </div>
                                 
-                                // Obter importância
-                                const importance = assunto.importance || 3;
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-file-alt"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Edital</div>
+                                        <div class="message-list-description">Ver progresso no edital completo ou por matéria</div>
+                                    </div>
+                                </div>
                                 
-                                // Calcular prioridade (mesma fórmula do módulo de revisões)
-                                const priority = (difficultyScore * 40) + (daysOverdue * 60) + (importance * 20);
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-chart-line"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Simulados</div>
+                                        <div class="message-list-description">Ver notas e relatórios de simulados</div>
+                                    </div>
+                                </div>
                                 
-                                pendingTopics.push({
-                                    id: assunto.nome,
-                                    nome: assunto.nome,
-                                    disciplina: disciplina.name,
-                                    priority: priority,
-                                    daysOverdue: daysOverdue,
-                                    difficulty: avgDifficulty,
-                                    importance: importance
-                                });
-                            }
-                        });
-                    }
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-cog"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Configurar</div>
+                                        <div class="message-list-description">Ajustar quantidade de matérias por dia</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-question-circle"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Ajuda</div>
+                                        <div class="message-list-description">Mostrar esta mensagem de ajuda</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-info"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Informações</div>
+                                        <div class="message-list-description">Sobre o StudyFlow</div>
+                                    </div>
+                                </div>
+
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Reset Dia 19</div>
+                                        <div class="message-list-description">Função temporária para liberar o dia 19</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                this.addBotMessage(helpCard, true, 'help-message');
+            }
+
+            showInfo() {
+                const infoCard = `
+                    <div class="message-card">
+                        <div class="message-card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="message-card-title">Sobre o StudyFlow</div>
+                        </div>
+                        <div class="message-card-content">
+                            <div class="message-text">
+                                O StudyFlow é seu assistente pessoal de estudos, integrando todas as suas ferramentas de aprendizado em um só lugar.
+                            </div>
+                            <div class="message-muted" style="margin-top: 10px">
+                                Comigo você pode:
+                            </div>
+                            <div class="message-list" style="margin-top: 8px">
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Gerenciar seu ciclo de estudos</div>
+                                    </div>
+                                </div>
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Registrar questões e revisões</div>
+                                    </div>
+                                </div>
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Acompanhar seu progresso no edital</div>
+                                    </div>
+                                </div>
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Analisar desempenho em simulados</div>
+                                    </div>
+                                </div>
+                                <div class="message-list-item">
+                                    <div class="message-list-icon"><i class="fas fa-check"></i></div>
+                                    <div class="message-list-content">
+                                        <div class="message-list-title">Receber alertas e lembretes</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                this.addBotMessage(infoCard, true, 'info-message');
+            }
+
+            showQuickActions() {
+                this.addBotMessage(`
+                    <div class="quick-actions">
+                        <button class="action-btn primary" onclick="chatBot.showDailySummary()">
+                            <i class="fas fa-calendar-day"></i> Resumo do Dia
+                        </button>
+                        <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
+                            <i class="fas fa-plus-circle"></i> Registrar
+                        </button>
+                        <button class="action-btn info" onclick="chatBot.showEditalMenu()">
+                            <i class="fas fa-file-alt"></i> Edital
+                        </button>
+                        <button class="action-btn info" onclick="chatBot.showSimuladosMenu()">
+                            <i class="fas fa-chart-line"></i> Simulados
+                        </button>
+                        <button class="action-btn info" onclick="chatBot.showConfigModal()">
+                            <i class="fas fa-cog"></i> Configurar
+                        </button>
+                        <button class="action-btn info" onclick="chatBot.showHelp()">
+                            <i class="fas fa-question-circle"></i> Ajuda
+                        </button>
+                        <button class="action-btn info" onclick="chatBot.showInfo()">
+                            <i class="fas fa-info"></i> Informações
+                        </button>
+                        <!-- BOTÃO DE RESET TEMPORÁRIO -->
+                        <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
+                            <i class="fas fa-exclamation-triangle"></i> Reset Dia 19
+                        </button>
+                    </div>
+                `, false);
+            }
+
+            toggleEmojiPicker() {
+                // Implementação básica de emoji picker
+                const emojis = ["😊", "👍", "❤️", "🔥", "⭐", "📚", "🎯", "💡", "🚀", "✅"];
+                let emojiHTML = '<div class="quick-actions">';
+                emojis.forEach(emoji => {
+                    emojiHTML += `<button class="action-btn" onclick="chatBot.addEmoji('${emoji}')">${emoji}</button>`;
                 });
+                emojiHTML += '</div>';
                 
-                // Fase 2: Ordenar por prioridade (decrescente)
-                pendingTopics.sort((a, b) => b.priority - a.priority);
-                
-                // Fase 3: Limitar pela meta diária
-                return pendingTopics.slice(0, dailyReviewGoal);
+                this.addBotMessage(emojiHTML, false);
             }
 
-            calculateOverdueReviews() {
-                const disciplines = this.getModuleData('disciplines');
-                if (!disciplines || !Array.isArray(disciplines)) return 0;
-                
-                const hoje = new Date();
-                const todayTimestamp = hoje.getTime();
-                let atrasadas = 0;
-                
-                disciplines.forEach(disciplina => {
-                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
-                        disciplina.assuntos.forEach(assunto => {
-                            if (assunto.nextReviewDate && assunto.nextReviewDate < todayTimestamp && !assunto.suspended) {
-                                atrasadas++;
-                            }
-                        });
-                    }
-                });
-                
-                return atrasadas;
-            }
-
-            // FUNÇÃO MELHORADA: Agora retorna múltiplas matérias baseado na configuração
-            getTodaySubjects() {
-                const activeCycle = this.getActiveCycle();
-                if (!activeCycle || !activeCycle.generatedCycle) {
-                    console.log('Ciclo ativo não encontrado ou sem generatedCycle');
-                    return [];
-                }
-                
-                const todayIndex = activeCycle.currentDay || 0;
-                const materiasPorDia = this.materiasPorDia || 1;
-                let subjects = [];
-                
-                console.log('Ciclo encontrado:', activeCycle);
-                console.log('Dia atual:', todayIndex);
-                console.log('Matérias por dia:', materiasPorDia);
-                
-                // Se o ciclo não tiver generatedCycle, retornar array vazio
-                if (!activeCycle.generatedCycle || !Array.isArray(activeCycle.generatedCycle)) {
-                    console.log('GeneratedCycle não encontrado ou não é array');
-                    return [];
-                }
-                
-                const cycleLength = activeCycle.generatedCycle.length;
-                if (cycleLength === 0) {
-                    console.log('GeneratedCycle está vazio');
-                    return [];
-                }
-                
-                // Ajustar o índice para estar dentro dos limites
-                const adjustedIndex = todayIndex % cycleLength;
-                
-                // Pegar as próximas matérias baseado na configuração
-                for (let i = 0; i < materiasPorDia; i++) {
-                    const index = (adjustedIndex + i) % cycleLength;
-                    let subject = activeCycle.generatedCycle[index];
-                    
-                    // Se o subject for um array (múltiplas matérias no mesmo dia), juntá-las
-                    if (Array.isArray(subject)) {
-                        subject = subject.join(', ');
-                    }
-                    
-                    // Ignorar revisões e simulados na contagem
-                    if (subject && !subject.includes('Revisão') && !subject.includes('Simulado')) {
-                        subjects.push(subject);
-                    }
-                }
-                
-                console.log('Matérias encontradas para hoje:', subjects);
-                return subjects;
-            }
-
-            getTodayDecks() {
-                const ankiData = this.getModuleData('ciclos_focus_v1');
-                if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
-                
-                const perDay = ankiData.perDay;
-                const blockIndex = ankiData.blockIndex || 0;
-                
-                // Simular quais baralhos devem ser revisados hoje
-                const startIndex = blockIndex * perDay;
-                const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
-                
-                return todayDecks.map(deck => deck.name);
-            }
-
-            registerHomeSession(subject, minutes) {
-                const hoje = new Date();
-                const dateKey = `sessions-${hoje.getDate()}-${hoje.getMonth()+1}-${hoje.getFullYear()}`;
-                
-                let sessions = this.getModuleData(dateKey) || [];
-                sessions.push({
-                    subject: subject,
-                    minutes: minutes,
-                    date: `${hoje.getDate()}-${hoje.getMonth()+1}-${hoje.getFullYear()}`,
-                    timestamp: hoje.toISOString()
-                });
-                
-                this.setModuleData(dateKey, sessions);
+            addEmoji(emoji) {
+                const input = document.getElementById('messageInput');
+                input.value += emoji;
+                input.focus();
             }
 
             // ==================================================================
@@ -2693,6 +2690,58 @@
                 this.addBotMessage(dataHTML, true, 'ultimo-simulado-data');
             }
 
+            // Funções de alertas
+            checkAlerts() {
+                const alertas = [];
+                const hoje = new Date();
+                
+                // Verificar revisões atrasadas
+                const revisoesAtrasadas = this.calculateOverdueReviews();
+                
+                if (revisoesAtrasadas > 0) {
+                    alertas.push({
+                        tipo: 'alert-danger',
+                        icone: 'exclamation-triangle',
+                        mensagem: `Você tem ${revisoesAtrasadas} revisões atrasadas!`
+                    });
+                }
+                
+                // Verificar meta diária
+                const dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+                const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+                
+                // Verificar se é um novo dia
+                const lastReviewDate = this.getModuleData('lastReviewDate');
+                const hojeStr = hoje.toISOString().split('T')[0];
+                
+                if (lastReviewDate !== hojeStr) {
+                    // Resetar contador diário se for um novo dia
+                    this.setModuleData('dailyCompletedReviews', 0);
+                    this.setModuleData('lastReviewDate', hojeStr);
+                } else if (dailyCompletedReviews < dailyReviewGoal / 2) {
+                    alertas.push({
+                        tipo: 'alert-warning',
+                        icone: 'bullseye',
+                        mensagem: `Você completou apenas ${dailyCompletedReviews} de ${dailyReviewGoal} revisões hoje.`
+                    });
+                }
+                
+                // Verificar dias sem estudo (simulação)
+                const ultimoEstudo = localStorage.getItem('ultimoEstudo');
+                if (ultimoEstudo) {
+                    const diasSemEstudo = Math.floor((hoje - new Date(ultimoEstudo)) / (1000 * 60 * 60 * 24));
+                    if (diasSemEstudo >= 2) {
+                        alertas.push({
+                            tipo: 'alert-danger',
+                            icone: 'calendar-times',
+                            mensagem: `Você não estuda há ${diasSemEstudo} dias!`
+                        });
+                    }
+                }
+                
+                return alertas;
+            }
+
             closeRegisterModal() {
                 document.getElementById('registerModal').style.display = 'none';
             }
@@ -2850,6 +2899,106 @@
                         </div>
                     </div>
                 `;
+            }
+
+            saveAllTasks() {
+                const cards = document.querySelectorAll('.task-card');
+                let hasError = false;
+                let savedCount = 0;
+                let totalTime = 0;
+                let activities = {
+                    questoes: [],
+                    anki: [],
+                    teoria: []
+                };
+
+                cards.forEach(card => {
+                    const type = card.getAttribute('data-type');
+                    const id = card.getAttribute('data-id');
+
+                    if (type === 'questoes') {
+                        const feitas = document.getElementById(`questoes-feitas-${id}`).value;
+                        const erradas = document.getElementById(`questoes-erradas-${id}`).value;
+                        const tempo = document.getElementById(`questoes-tempo-${id}`).value;
+
+                        if (!feitas || !tempo) {
+                            hasError = true;
+                            card.style.border = '1px solid red';
+                        } else {
+                            card.style.border = '';
+                            this.saveQuestoes(id, feitas, erradas, tempo);
+                            savedCount++;
+                            totalTime += parseInt(tempo);
+                            activities.questoes.push({
+                                assunto: id,
+                                feitas: parseInt(feitas),
+                                erradas: parseInt(erradas),
+                                tempo: parseInt(tempo)
+                            });
+                        }
+                    } else if (type === 'anki') {
+                        const tempo = document.getElementById(`anki-tempo-${id}`).value;
+                        const cards = document.getElementById(`anki-cards-${id}`).value;
+
+                        if (!tempo || !cards) {
+                            hasError = true;
+                            card.style.border = '1px solid red';
+                        } else {
+                            card.style.border = '';
+                            this.saveAnki(id, tempo, cards);
+                            savedCount++;
+                            totalTime += parseInt(tempo);
+                            activities.anki.push({
+                                deck: id,
+                                tempo: parseInt(tempo),
+                                cards: parseInt(cards)
+                            });
+                        }
+                    } else if (type === 'teoria') {
+                        const conteudo = document.getElementById(`teoria-conteudo-${id}`).value;
+                        const pagina = document.getElementById(`teoria-pagina-${id}`).value;
+                        const tempo = document.getElementById(`teoria-tempo-${id}`).value;
+
+                        if (!tempo) {
+                            hasError = true;
+                            card.style.border = '1px solid red';
+                        } else {
+                            card.style.border = '';
+                            this.saveTeoria(id, conteudo, pagina, tempo);
+                            savedCount++;
+                            totalTime += parseInt(tempo);
+                            activities.teoria.push({
+                                materia: id,
+                                conteudo: conteudo,
+                                pagina: pagina,
+                                tempo: parseInt(tempo)
+                            });
+                        }
+                    }
+                });
+
+                if (hasError) {
+                    alert('Preencha todos os campos obrigatórios!');
+                    return;
+                }
+
+                // Salvar a data do último registro
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
+                localStorage.setItem('lastRegisterDate', hojeStr);
+                
+                // Salvar as atividades do dia
+                const dailyActivities = {
+                    date: hojeStr,
+                    activities: activities
+                };
+                localStorage.setItem('dailyActivities', JSON.stringify(dailyActivities));
+
+                this.closeRegisterModal();
+                
+                if (savedCount > 0) {
+                    this.showRegistrationSummary(savedCount, totalTime, activities);
+                }
             }
 
             showRegistrationSummary(savedCount, totalTime, activities) {
@@ -3022,7 +3171,7 @@
             }
 
             // ==================================================================
-            // FUNÇÕES DE INTEGRAÇÃO ESPECÍFICAS (PERMANECEM INTACTAS)
+            // FUNÇÕES DE INTEGRAÇÃO ESPECÍFICAS
             // ==================================================================
 
             // Função para atualizar o módulo de revisões (questões)
@@ -3104,6 +3253,65 @@
                 }
             }
 
+            // Função para atualizar o ciclo de estudos (matérias teóricas)
+            updateStudyCycle(materiaId, tempo) {
+                const activeCycle = this.getActiveCycle();
+                const hoje = new Date().toISOString().split('T')[0]; // Data no formato YYYY-MM-DD
+
+                if (activeCycle && activeCycle.generatedCycle) {
+                    const todayIndex = activeCycle.currentDay || 0;
+                    const cycleLength = activeCycle.generatedCycle.length;
+
+                    // Encontrar a matéria no ciclo atual
+                    let materiaEncontrada = activeCycle.generatedCycle[todayIndex % cycleLength];
+
+                    // Se for um array (múltiplas matérias no mesmo dia), verificar se a matéria está presente
+                    if (Array.isArray(materiaEncontrada)) {
+                        if (materiaEncontrada.includes(materiaId)) {
+                            materiaEncontrada = materiaId;
+                        } else {
+                            materiaEncontrada = null;
+                        }
+                    } else {
+                        if (materiaEncontrada !== materiaId) {
+                            materiaEncontrada = null;
+                        }
+                    }
+
+                    if (materiaEncontrada) {
+                        // Marcar como estudada no dia atual
+                        if (!activeCycle.completedSubjects) {
+                            activeCycle.completedSubjects = {};
+                        }
+                        activeCycle.completedSubjects[todayIndex] = true;
+
+                        // Avançar para o próximo dia apenas se ainda não avançou hoje
+                        if (activeCycle.lastAdvanced !== hoje) {
+                            activeCycle.currentDay = (todayIndex + 1) % cycleLength;
+                            activeCycle.lastAdvanced = hoje;
+                        }
+
+                        // Atualizar estatísticas de progresso
+                        if (!activeCycle.studyTime) {
+                            activeCycle.studyTime = {};
+                        }
+                        // Usar a data como chave para o tempo de estudo
+                        activeCycle.studyTime[hoje] = (activeCycle.studyTime[hoje] || 0) + parseInt(tempo);
+
+                        // Salvar de volta
+                        this.setModuleData('StudyFlow_activeCycle', activeCycle);
+
+                        console.log('Ciclo de estudos atualizado para:', materiaId);
+                        return true;
+                    }
+                }
+
+                console.warn('Ciclo de estudos não encontrado ou matéria não localizada');
+                return false;
+            }
+
+            // FUNÇÕES DO MÓDULO DE REVISÕES (copiadas do código fornecido)
+
             // Função para calcular intervalo baseado em desempenho
             getPerformanceBasedInterval(accuracy) {
                 accuracy = Math.max(0, Math.min(100, accuracy));
@@ -3163,6 +3371,34 @@
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 return today.getTime();
+            }
+
+            // MODIFICAÇÕES NAS FUNÇÕES EXISTENTES
+
+            // Modificar saveQuestoes para usar a nova função de integração
+            saveQuestoes(assuntoId, feitas, erradas, tempo) {
+                const corretas = parseInt(feitas) - parseInt(erradas);
+                const dificuldade = 2; // Valor padrão (Bom) - poderia ser capturado do usuário
+                
+                // Atualizar módulo de revisões
+                const revisaoAtualizada = this.updateReviewModule(assuntoId, feitas, corretas, tempo, dificuldade);
+                
+                if (revisaoAtualizada) {
+                    // Atualizar módulo home (mantendo o funcionamento atual)
+                    let dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
+                    dailyCompletedReviews += 1;
+                    this.setModuleData('dailyCompletedReviews', dailyCompletedReviews);
+
+                    const hoje = new Date();
+                    this.setModuleData('lastReviewDate', hoje.toISOString().split('T')[0]);
+
+                    this.registerHomeSession(`Questões - ${assuntoId}`, parseInt(tempo));
+                    localStorage.setItem('ultimoEstudo', new Date().toISOString());
+                    
+                    console.log('Questões registradas com sucesso em todos os módulos');
+                } else {
+                    console.error('Falha ao registrar questões no módulo de revisões');
+                }
             }
 
             // Modificar saveTeoria para usar a nova função de integração
@@ -3256,6 +3492,264 @@
             // ==================================================================
             // FIM DAS FUNÇÕES DE INTEGRAÇÃO
             // ==================================================================
+
+            // Funções de utilitário
+            toggleTheme() {
+                if (this.currentTheme === 'light') {
+                    document.body.classList.add('dark-theme');
+                    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+                    this.currentTheme = 'dark';
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+                    this.currentTheme = 'light';
+                }
+                localStorage.setItem('theme', this.currentTheme);
+            }
+
+            addUserMessage(content) {
+                this.addMessageToChat(content, true);
+            }
+
+            // Buscar ciclo ativo de forma robusta
+            getActiveCycle() {
+                // Tentar diferentes chaves possíveis para o ciclo ativo
+                const possibleKeys = [
+                    'StudyFlow_activeCycle',
+                    'StudyFlow_allCycles',
+                    'activeCycle',
+                    'StudyFlow_cycle',
+                    'currentCycle'
+                ];
+                
+                for (const key of possibleKeys) {
+                    const data = this.getModuleData(key);
+                    if (data) {
+                        // Se for um array (como StudyFlow_allCycles), pegar o primeiro ciclo
+                        if (Array.isArray(data) && data.length > 0) {
+                            const cycle = data[0];
+                            if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
+                                console.log('Ciclo encontrado em:', key, cycle);
+                                return cycle;
+                            }
+                        }
+                        // Se for um objeto direto
+                        else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
+                            console.log('Ciclo encontrado em:', key, data);
+                            return data;
+                        }
+                    }
+                }
+                
+                // Se não encontrou, tentar buscar em todas as chaves do localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('cycle') || key.includes('Cycle') || key.includes('CYCLE'))) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            if (data) {
+                                // Se for um array, pegar o primeiro item
+                                if (Array.isArray(data) && data.length > 0) {
+                                    const cycle = data[0];
+                                    if (cycle && cycle.generatedCycle && Array.isArray(cycle.generatedCycle)) {
+                                        console.log('Ciclo encontrado em:', key, cycle);
+                                        return cycle;
+                                    }
+                                }
+                                // Se for um objeto direto
+                                else if (data.generatedCycle && Array.isArray(data.generatedCycle)) {
+                                    console.log('Ciclo encontrado em:', key, data);
+                                    return data;
+                                }
+                            }
+                        } catch (e) {
+                            // Ignorar chaves que não são JSON válido
+                        }
+                    }
+                }
+                
+                console.log('Não foi possível encontrar um ciclo ativo.');
+                return null;
+            }
+
+            // Funções de integração com módulos
+            getModuleData(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (e) {
+                    console.error(`Erro ao carregar dados do módulo: ${key}`, e);
+                    return null;
+                }
+            }
+
+            setModuleData(key, data) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                    return true;
+                } catch (e) {
+                    console.error(`Erro ao salvar dados no módulo: ${key}`, e);
+                    return false;
+                }
+            }
+
+            // ALGORITMO DE PRIORIZAÇÃO IDÊNTICO AO MÓDULO DE REVISÕES
+            calculateTodayReviews() {
+                const disciplines = this.getModuleData('disciplines');
+                const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+                
+                if (!disciplines || !Array.isArray(disciplines)) return [];
+                
+                const hoje = new Date();
+                const todayTimestamp = hoje.getTime();
+                let pendingTopics = [];
+                
+                // Fase 1: Coletar todos os assuntos pendentes
+                disciplines.forEach(disciplina => {
+                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+                        disciplina.assuntos.forEach(assunto => {
+                            // Ignorar assuntos suspensos
+                            if (assunto.suspended) return;
+                            
+                            // Verificar se está na data de revisão ou atrasado
+                            if (assunto.nextReviewDate && assunto.nextReviewDate <= todayTimestamp) {
+                                // Calcular dias de atraso
+                                const daysOverdue = Math.max(0, Math.floor((todayTimestamp - assunto.nextReviewDate) / (1000 * 60 * 60 * 24)));
+                                
+                                // Calcular dificuldade média (invertida: maior dificuldade = maior prioridade)
+                                let avgDifficulty = 2; // padrão
+                                if (assunto.difficultyHistory && assunto.difficultyHistory.length > 0) {
+                                    avgDifficulty = assunto.difficultyHistory.reduce((a, b) => a + b, 0) / assunto.difficultyHistory.length;
+                                }
+                                const difficultyScore = (3 - avgDifficulty); // Inverte a escala
+                                
+                                // Obter importância
+                                const importance = assunto.importance || 3;
+                                
+                                // Calcular prioridade (mesma fórmula do módulo de revisões)
+                                const priority = (difficultyScore * 40) + (daysOverdue * 60) + (importance * 20);
+                                
+                                pendingTopics.push({
+                                    id: assunto.nome,
+                                    nome: assunto.nome,
+                                    disciplina: disciplina.name,
+                                    priority: priority,
+                                    daysOverdue: daysOverdue,
+                                    difficulty: avgDifficulty,
+                                    importance: importance
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                // Fase 2: Ordenar por prioridade (decrescente)
+                pendingTopics.sort((a, b) => b.priority - a.priority);
+                
+                // Fase 3: Limitar pela meta diária
+                return pendingTopics.slice(0, dailyReviewGoal);
+            }
+
+            calculateOverdueReviews() {
+                const disciplines = this.getModuleData('disciplines');
+                if (!disciplines || !Array.isArray(disciplines)) return 0;
+                
+                const hoje = new Date();
+                const todayTimestamp = hoje.getTime();
+                let atrasadas = 0;
+                
+                disciplines.forEach(disciplina => {
+                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+                        disciplina.assuntos.forEach(assunto => {
+                            if (assunto.nextReviewDate && assunto.nextReviewDate < todayTimestamp && !assunto.suspended) {
+                                atrasadas++;
+                            }
+                        });
+                    }
+                });
+                
+                return atrasadas;
+            }
+
+            // FUNÇÃO MELHORADA: Agora retorna múltiplas matérias baseado na configuração
+            getTodaySubjects() {
+                const activeCycle = this.getActiveCycle();
+                if (!activeCycle || !activeCycle.generatedCycle) {
+                    console.log('Ciclo ativo não encontrado ou sem generatedCycle');
+                    return [];
+                }
+                
+                const todayIndex = activeCycle.currentDay || 0;
+                const materiasPorDia = this.materiasPorDia || 1;
+                let subjects = [];
+                
+                console.log('Ciclo encontrado:', activeCycle);
+                console.log('Dia atual:', todayIndex);
+                console.log('Matérias por dia:', materiasPorDia);
+                
+                // Se o ciclo não tiver generatedCycle, retornar array vazio
+                if (!activeCycle.generatedCycle || !Array.isArray(activeCycle.generatedCycle)) {
+                    console.log('GeneratedCycle não encontrado ou não é array');
+                    return [];
+                }
+                
+                const cycleLength = activeCycle.generatedCycle.length;
+                if (cycleLength === 0) {
+                    console.log('GeneratedCycle está vazio');
+                    return [];
+                }
+                
+                // Ajustar o índice para estar dentro dos limites
+                const adjustedIndex = todayIndex % cycleLength;
+                
+                // Pegar as próximas matérias baseado na configuração
+                for (let i = 0; i < materiasPorDia; i++) {
+                    const index = (adjustedIndex + i) % cycleLength;
+                    let subject = activeCycle.generatedCycle[index];
+                    
+                    // Se o subject for um array (múltiplas matérias no mesmo dia), juntá-las
+                    if (Array.isArray(subject)) {
+                        subject = subject.join(', ');
+                    }
+                    
+                    // Ignorar revisões e simulados na contagem
+                    if (subject && !subject.includes('Revisão') && !subject.includes('Simulado')) {
+                        subjects.push(subject);
+                    }
+                }
+                
+                console.log('Matérias encontradas para hoje:', subjects);
+                return subjects;
+            }
+
+            getTodayDecks() {
+                const ankiData = this.getModuleData('ciclos_focus_v1');
+                if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
+                
+                const perDay = ankiData.perDay;
+                const blockIndex = ankiData.blockIndex || 0;
+                
+                // Simular quais baralhos devem ser revisados hoje
+                const startIndex = blockIndex * perDay;
+                const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
+                
+                return todayDecks.map(deck => deck.name);
+            }
+
+            registerHomeSession(subject, minutes) {
+                const hoje = new Date();
+                const dateKey = `sessions-${hoje.getDate()}-${hoje.getMonth()+1}-${hoje.getFullYear()}`;
+                
+                let sessions = this.getModuleData(dateKey) || [];
+                sessions.push({
+                    subject: subject,
+                    minutes: minutes,
+                    date: `${hoje.getDate()}-${hoje.getMonth()+1}-${hoje.getFullYear()}`,
+                    timestamp: hoje.toISOString()
+                });
+                
+                this.setModuleData(dateKey, sessions);
+            }
         }
 
         // Inicializar o chatbot quando a página carregar
