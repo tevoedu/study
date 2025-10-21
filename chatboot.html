@@ -1482,6 +1482,7 @@
                 const materiasCiclo = this.getTodaySubjects();
 
                 // CORREÇÃO APLICADA: Obter baralhos do Anki ATUALIZADOS
+                // Forçar atualização dos baralhos do Anki para a data atual
                 const baralhosAnki = this.getTodayDecks();
 
                 // Construir o card de resumo pendente com nova formatação
@@ -1831,9 +1832,15 @@
                 if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
                 
                 const perDay = ankiData.perDay;
-                const blockIndex = ankiData.blockIndex || 0;
                 
-                // Calcular os baralhos do dia atual baseado no blockIndex atual
+                // CORREÇÃO: Calcular blockIndex baseado na data atual, não no estado armazenado
+                // Isso garante que após registrar atividades retroativas, os baralhos sejam atualizados
+                const hoje = new Date();
+                const startDate = new Date(ankiData.startDate);
+                const diffTime = hoje.getTime() - startDate.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+                const blockIndex = diffDays % Math.ceil(ankiData.decks.length / perDay);
+                
                 const startIndex = blockIndex * perDay;
                 const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
                 
@@ -2573,6 +2580,29 @@
                 
                 // Limpar tarefas concluídas
                 this.completedTasks = {};
+                
+                // CORREÇÃO: Forçar atualização dos dados do Anki para garantir sincronização
+                this.forceAnkiUpdate();
+            }
+
+            // CORREÇÃO: Nova função para forçar atualização dos dados do Anki
+            forceAnkiUpdate() {
+                // Limpar cache do Anki para garantir que o próximo resumo seja atualizado
+                const ankiData = this.getModuleData('ciclos_focus_v1');
+                if (ankiData) {
+                    // Forçar recálculo do blockIndex baseado na data atual
+                    // Isso garante que após registrar atividades retroativas, o Anki seja atualizado
+                    const hoje = new Date();
+                    const startDate = new Date(ankiData.startDate);
+                    const diffTime = hoje.getTime() - startDate.getTime();
+                    const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+                    
+                    // Atualizar o blockIndex no módulo Anki
+                    ankiData.blockIndex = diffDays % Math.ceil(ankiData.decks.length / ankiData.perDay);
+                    this.setModuleData('ciclos_focus_v1', ankiData);
+                    
+                    console.log('Anki atualizado: blockIndex =', ankiData.blockIndex);
+                }
             }
 
             // NOVA FUNÇÃO: Registrar atividades no módulo Home com data correta
