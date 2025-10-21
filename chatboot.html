@@ -630,6 +630,11 @@
             color: white;
         }
 
+        .action-btn.yesterday {
+            background-color: var(--warning);
+            color: white;
+        }
+
         .chat-date {
             text-align: center;
             color: var(--gray);
@@ -665,6 +670,39 @@
         .reaction-icon {
             font-size: 0.7rem;
             color: var(--gray);
+        }
+
+        .date-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background-color: var(--light-gray);
+            border-radius: 8px;
+        }
+        
+        .date-display {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .date-nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .date-nav-btn:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
@@ -982,6 +1020,10 @@
                 // Configuração de matérias por dia
                 this.materiasPorDia = parseInt(localStorage.getItem('studyFlow_materiasPorDia')) || 1;
                 
+                // NOVAS VARIÁVEIS PARA CONTROLE DE DATA
+                this.currentViewDate = this.getDynamicDateString(); // Data sendo visualizada
+                this.isRetroactiveMode = false; // Modo de registro retroativo
+                
                 this.init();
             }
 
@@ -992,8 +1034,84 @@
                 return `${hours}:${minutes}`;
             }
 
+            // NOVA FUNÇÃO: Obter data de ontem
+            getYesterdayDateString() {
+                const hoje = new Date();
+                const ontem = new Date(hoje);
+                ontem.setDate(hoje.getDate() - 1);
+                const year = ontem.getFullYear();
+                const month = String(ontem.getMonth() + 1).padStart(2, '0');
+                const day = String(ontem.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            // NOVA FUNÇÃO: Verificar se é possível registrar para ontem
+            canRegisterYesterday() {
+                const hojeStr = this.getDynamicDateString();
+                const ontemStr = this.getYesterdayDateString();
+                
+                // Verificar se já registrou hoje - se sim, não pode registrar ontem
+                if (this.hasRegisteredForDate(hojeStr)) {
+                    return false;
+                }
+                
+                // Verificar se já registrou para ontem
+                if (this.hasRegisteredForDate(ontemStr)) {
+                    return false;
+                }
+                
+                // Verificar se existe memória das tarefas de ontem
+                const yesterdayMemory = this.getDateMemory(ontemStr);
+                return yesterdayMemory && yesterdayMemory.tasks;
+            }
+
+            // NOVA FUNÇÃO: Obter memória de uma data específica
+            getDateMemory(dateString) {
+                return JSON.parse(localStorage.getItem(`studyFlow_memory_${dateString}`));
+            }
+
+            // NOVA FUNÇÃO: Salvar memória para uma data específica
+            saveDateMemory(dateString, data) {
+                localStorage.setItem(`studyFlow_memory_${dateString}`, JSON.stringify(data));
+            }
+
+            // NOVA FUNÇÃO: Verificar se já registrou para uma data específica
+            hasRegisteredForDate(dateString) {
+                const dailyActivities = JSON.parse(localStorage.getItem('dailyActivities')) || {};
+                return dailyActivities.date === dateString;
+            }
+
+            // NOVA FUNÇÃO: Carregar memória das datas ao inicializar
+            initDateMemory() {
+                const hojeStr = this.getDynamicDateString();
+                const ontemStr = this.getYesterdayDateString();
+                
+                // Garantir que temos memória do dia atual
+                if (!this.getDateMemory(hojeStr)) {
+                    const todayTasks = this.getDateTasks(hojeStr);
+                    this.saveDateMemory(hojeStr, {
+                        tasks: todayTasks,
+                        savedAt: new Date().toISOString()
+                    });
+                }
+                
+                // Manter memória de ontem (se existir)
+                const yesterdayMemory = this.getDateMemory(ontemStr);
+                if (yesterdayMemory) {
+                    // Verificar se a memória é muito antiga (mais de 3 dias)
+                    const memoryDate = new Date(yesterdayMemory.savedAt);
+                    const hoje = new Date();
+                    const diffDays = Math.floor((hoje - memoryDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays > 3) {
+                        localStorage.removeItem(`studyFlow_memory_${ontemStr}`);
+                    }
+                }
+            }
+
             init() {
                 this.initTheme();
+                this.initDateMemory(); // NOVA LINHA
                 this.initChat();
                 this.initEventListeners();
                 this.showWelcomeMessage();
@@ -1075,14 +1193,21 @@
             }
 
             addQuickActions() {
+                const canRegisterYesterday = this.canRegisterYesterday();
+                
                 const quickActionsHTML = `
                     <div class="quick-actions">
                         <button class="action-btn primary" onclick="chatBot.showDailySummary()">
                             <i class="fas fa-calendar-day"></i> Resumo do Dia
                         </button>
                         <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
-                            <i class="fas fa-plus-circle"></i> Registrar Atividade
+                            <i class="fas fa-plus-circle"></i> Registrar Hoje
                         </button>
+                        ${canRegisterYesterday ? `
+                        <button class="action-btn yesterday" onclick="chatBot.openRegisterModal('${this.getYesterdayDateString()}')">
+                            <i class="fas fa-history"></i> Registrar Ontem
+                        </button>
+                        ` : ''}
                         <button class="action-btn info" onclick="chatBot.showEditalMenu()">
                             <i class="fas fa-file-alt"></i> Edital
                         </button>
@@ -1095,7 +1220,6 @@
                         <button class="action-btn info" onclick="chatBot.showHelp()">
                             <i class="fas fa-question-circle"></i> Ajuda
                         </button>
-                        <!-- BOTÃO DE RESET ATUALIZADO -->
                         <button class="action-btn reset" onclick="chatBot.showResetConfirmation()">
                             <i class="fas fa-exclamation-triangle"></i> Reset
                         </button>
@@ -1206,32 +1330,42 @@
                 return lastRegisterDate && this.isToday(lastRegisterDate);
             }
 
-            // MODIFICAR A FUNÇÃO showDailySummary (substituir a existente)
-            showDailySummary() {
-                const hoje = this.getDynamicDateObject(); // SEMPRE usa data dinâmica
-                const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
+            // FUNÇÃO MODIFICADA: showDailySummary com suporte a datas específicas
+            showDailySummary(dateString = null) {
+                const targetDate = dateString || this.getDynamicDateString();
+                const hojeObj = new Date(targetDate + 'T00:00:00');
+                const dataFormatada = this.formatDynamicDate(hojeObj);
                 
-                // CORREÇÃO APLICADA: Verificar se já registrou atividades HOJE usando a nova função
-                if (this.hasRegisteredToday()) {
-                    // Já registrou hoje - mostrar resumo do que foi feito
-                    this.showTodaySummary(hojeStr);
+                // Atualizar a data sendo visualizada
+                this.currentViewDate = targetDate;
+                
+                // Salvar as tarefas do dia na memória (se ainda não existir)
+                const memoryKey = `studyFlow_memory_${targetDate}`;
+                if (!localStorage.getItem(memoryKey)) {
+                    const todayTasks = this.getDateTasks(targetDate);
+                    this.saveDateMemory(targetDate, {
+                        tasks: todayTasks,
+                        savedAt: new Date().toISOString()
+                    });
+                }
+
+                if (this.hasRegisteredForDate(targetDate)) {
+                    this.showDateSummary(targetDate, dataFormatada);
                 } else {
-                    // Não registrou hoje - mostrar tarefas pendentes
-                    this.showPendingTasks(hojeStr);
+                    this.showPendingTasks(targetDate, dataFormatada);
                 }
             }
 
-            // MODIFICAR A FUNÇÃO showPendingTasks (substituir a existente)
-            showPendingTasks(hojeStr) {
-                const hoje = new Date(hojeStr + 'T00:00:00'); // Converte para objeto Date
-                const dataFormatada = this.formatDynamicDate(hoje); // Usa formatação dinâmica
-
+            // FUNÇÃO MODIFICADA: showPendingTasks com suporte a datas específicas
+            showPendingTasks(dateString, dataFormatada) {
+                const hoje = new Date(dateString + 'T00:00:00');
+                
                 // Buscar dados reais dos módulos
                 const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
                 const dailyCompletedReviews = this.getModuleData('dailyCompletedReviews') || 0;
 
                 // Calcular revisões para hoje (usando o mesmo algoritmo do módulo de revisões)
-                const revisoesHoje = this.calculateTodayReviews();
+                const revisoesHoje = this.calculateDateReviews(dateString);
 
                 // Calcular progresso da meta diária
                 const progressoMeta = Math.min((dailyCompletedReviews / dailyReviewGoal) * 100, 100);
@@ -1240,10 +1374,10 @@
                 const alertas = this.checkAlerts();
 
                 // Obter matérias do ciclo - COM MÚLTIPLAS MATÉRIAS
-                const materiasCiclo = this.getTodaySubjects();
+                const materiasCiclo = this.getDateSubjects(dateString);
 
                 // CORREÇÃO APLICADA: Obter baralhos do Anki ATUALIZADOS
-                const baralhosAnki = this.getTodayDecks();
+                const baralhosAnki = this.getDateDecks(dateString);
 
                 // Construir o card de resumo pendente com nova formatação
                 let summaryHTML = `
@@ -1409,18 +1543,30 @@
                     summaryHTML += `</div>`;
                 }
 
+                // ADICIONAR BOTÃO DE REGISTRO RETROATIVO SE FOR ONTEM
+                const hojeStr = this.getDynamicDateString();
+                if (dateString === this.getYesterdayDateString() && !this.hasRegisteredForDate(dateString)) {
+                    summaryHTML += `
+                        <div class="quick-actions">
+                            <button class="action-btn yesterday" onclick="chatBot.openRegisterModal('${dateString}')">
+                                <i class="fas fa-history"></i> Registrar Atividades de Ontem
+                            </button>
+                        </div>
+                    `;
+                }
+
                 summaryHTML += `
                         </div>
                     </div>
                 `;
 
-                this.addBotMessage(summaryHTML, true, 'pending-summary');
+                this.addBotMessage(summaryHTML, true, `pending-summary-${dateString}`);
 
                 // Adicionar botões de ação
                 setTimeout(() => {
                     this.addBotMessage(`
                         <div class="quick-actions">
-                            <button class="action-btn primary" onclick="chatBot.openRegisterModal()">
+                            <button class="action-btn primary" onclick="chatBot.openRegisterModal('${dateString}')">
                                 <i class="fas fa-plus-circle"></i> Registrar Atividades
                             </button>
                             <button class="action-btn info" onclick="chatBot.showHelp()">
@@ -1431,12 +1577,9 @@
                 }, 500);
             }
 
-            // MODIFICAR A FUNÇÃO showTodaySummary (substituir a existente)
-            showTodaySummary(hojeStr) {
-                const hoje = new Date(hojeStr + 'T00:00:00'); // Converte para objeto Date
-                const dataFormatada = this.formatDynamicDate(hoje); // Usa formatação dinâmica
-                
-                // Buscar atividades registradas hoje
+            // FUNÇÃO MODIFICADA: showTodaySummary para datas específicas
+            showDateSummary(dateString, dataFormatada) {
+                // Buscar atividades registradas para a data específica
                 const dailyActivities = JSON.parse(localStorage.getItem('dailyActivities')) || { activities: {} };
                 const atividades = dailyActivities.activities;
 
@@ -1538,7 +1681,7 @@
                     </div>
                 `;
 
-                this.addBotMessage(summaryHTML, true, 'today-summary');
+                this.addBotMessage(summaryHTML, true, `today-summary-${dateString}`);
 
                 // Não mostrar botão de registrar, pois já registrou hoje
                 setTimeout(() => {
@@ -1552,18 +1695,223 @@
                 }, 500);
             }
 
-            // MODIFICAR A FUNÇÃO openRegisterModal (substituir a existente)
-            openRegisterModal() {
-                const hojeStr = this.getDynamicDateString(); // SEMPRE usa data atual
+            // FUNÇÃO MODIFICADA: openRegisterModal com suporte a datas específicas
+            openRegisterModal(dateString = null) {
+                const targetDate = dateString || this.getDynamicDateString();
                 
-                // CORREÇÃO APLICADA: Verificar se já registrou HOJE usando a nova função
-                if (this.hasRegisteredToday()) {
-                    this.typeMessage("Você já registrou suas atividades hoje! 😊\n\nSe quiser ver o resumo do que foi feito, peça o <strong>resumo do dia</strong>.");
+                // Verificar se já registrou para a data alvo
+                if (this.hasRegisteredForDate(targetDate)) {
+                    const dataFormatada = this.formatDynamicDate(new Date(targetDate + 'T00:00:00'));
+                    this.typeMessage(`Você já registrou suas atividades para ${dataFormatada}! 😊`);
                     return;
                 }
                 
+                // Configurar modo retroativo se for uma data passada
+                this.isRetroactiveMode = dateString !== null && dateString !== this.getDynamicDateString();
+                this.currentViewDate = targetDate;
+                
                 document.getElementById('registerModal').style.display = 'flex';
-                this.loadTodayTasks();
+                this.loadDateTasks(targetDate);
+            }
+
+            // FUNÇÃO MODIFICADA: loadTodayTasks para carregar tarefas de data específica
+            loadDateTasks(dateString) {
+                const modalBody = document.getElementById('registerModalBody');
+                
+                // ADICIONAR NAVEGAÇÃO DE DATA NO MODAL
+                const dateObj = new Date(dateString + 'T00:00:00');
+                const dataFormatada = this.formatDynamicDate(dateObj);
+                const hojeStr = this.getDynamicDateString();
+                const ontemStr = this.getYesterdayDateString();
+                
+                let dateNavigation = `
+                    <div class="date-navigation">
+                        <div class="date-display">
+                            <i class="fas fa-calendar-day"></i>
+                            Registro para: ${dataFormatada}
+                            ${this.isRetroactiveMode ? '<span class="message-badge message-badge-warning">Retroativo</span>' : ''}
+                        </div>
+                `;
+                
+                // Botão para ontem (se aplicável)
+                if (dateString === hojeStr && this.canRegisterYesterday()) {
+                    dateNavigation += `
+                        <button class="date-nav-btn" onclick="chatBot.openRegisterModal('${ontemStr}')">
+                            <i class="fas fa-arrow-left"></i> Registrar Ontem
+                        </button>
+                    `;
+                } else if (dateString === ontemStr) {
+                    dateNavigation += `
+                        <button class="date-nav-btn" onclick="chatBot.openRegisterModal('${hojeStr}')">
+                            Registrar Hoje <i class="fas fa-arrow-right"></i>
+                        </button>
+                    `;
+                } else {
+                    dateNavigation += `<button class="date-nav-btn" disabled>Navegação</button>`;
+                }
+                
+                dateNavigation += `</div>`;
+                modalBody.innerHTML = dateNavigation;
+                
+                // Carregar tarefas da data específica
+                const dateTasks = this.getDateTasks(dateString);
+                
+                if (dateTasks.questoes.length === 0 && dateTasks.anki.length === 0 && dateTasks.teoria.length === 0) {
+                    modalBody.innerHTML += `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Não há tarefas pendentes para esta data!</h3>
+                            <p>Não foram encontradas atividades programadas para ${dataFormatada}.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let tasksHTML = '<div class="tasks-grid">';
+                
+                dateTasks.questoes.forEach(questao => {
+                    tasksHTML += this.createQuestaoCard(questao);
+                });
+                
+                dateTasks.anki.forEach(deck => {
+                    tasksHTML += this.createAnkiCard(deck);
+                });
+                
+                dateTasks.teoria.forEach(materia => {
+                    tasksHTML += this.createTeoriaCard(materia);
+                });
+                
+                tasksHTML += '</div>';
+                modalBody.innerHTML += tasksHTML;
+            }
+
+            // NOVA FUNÇÃO: Obter tarefas para uma data específica
+            getDateTasks(dateString) {
+                const dateObj = new Date(dateString + 'T00:00:00');
+                const tasks = {
+                    questoes: [],
+                    anki: [],
+                    teoria: []
+                };
+
+                // Buscar assuntos para questões da data específica
+                tasks.questoes = this.calculateDateReviews(dateString);
+                
+                // Buscar baralhos do Anki para a data específica
+                tasks.anki = this.getDateDecks(dateString).map(deckName => ({
+                    id: deckName,
+                    nome: deckName,
+                    emoji: '🔁'
+                }));
+
+                // Buscar matérias de teoria para a data específica
+                tasks.teoria = this.getDateSubjects(dateString);
+
+                return tasks;
+            }
+
+            // NOVA FUNÇÃO: Calcular revisões para uma data específica
+            calculateDateReviews(dateString) {
+                // Implementação similar à calculateTodayReviews, mas considerando a data específica
+                const disciplines = this.getModuleData('disciplines');
+                const dailyReviewGoal = this.getModuleData('dailyReviewGoal') || 5;
+                
+                if (!disciplines || !Array.isArray(disciplines)) return [];
+                
+                const targetDate = new Date(dateString + 'T00:00:00').getTime();
+                let pendingTopics = [];
+                
+                disciplines.forEach(disciplina => {
+                    if (disciplina.assuntos && Array.isArray(disciplina.assuntos)) {
+                        disciplina.assuntos.forEach(assunto => {
+                            if (assunto.suspended) return;
+                            
+                            if (assunto.nextReviewDate && assunto.nextReviewDate <= targetDate) {
+                                const daysOverdue = Math.max(0, Math.floor((targetDate - assunto.nextReviewDate) / (1000 * 60 * 60 * 24)));
+                                let avgDifficulty = 2;
+                                if (assunto.difficultyHistory && assunto.difficultyHistory.length > 0) {
+                                    avgDifficulty = assunto.difficultyHistory.reduce((a, b) => a + b, 0) / assunto.difficultyHistory.length;
+                                }
+                                const difficultyScore = (3 - avgDifficulty);
+                                const importance = assunto.importance || 3;
+                                const priority = (difficultyScore * 40) + (daysOverdue * 60) + (importance * 20);
+                                
+                                pendingTopics.push({
+                                    id: assunto.nome,
+                                    nome: assunto.nome,
+                                    disciplina: disciplina.name,
+                                    priority: priority,
+                                    daysOverdue: daysOverdue,
+                                    difficulty: avgDifficulty,
+                                    importance: importance
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                pendingTopics.sort((a, b) => b.priority - a.priority);
+                return pendingTopics.slice(0, dailyReviewGoal);
+            }
+
+            // NOVA FUNÇÃO: Obter baralhos do Anki para uma data específica
+            getDateDecks(dateString) {
+                // Implementação similar à getTodayDecks, mas calculando com base na data
+                const ankiData = this.getModuleData('ciclos_focus_v1');
+                if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
+                
+                const perDay = ankiData.perDay;
+                // Calcular blockIndex baseado na data (simplificado)
+                const startDate = new Date(ankiData.startDate || dateString);
+                const targetDate = new Date(dateString + 'T00:00:00');
+                const diffTime = targetDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                const blockIndex = Math.floor(diffDays / (ankiData.decks.length / perDay));
+                
+                const startIndex = blockIndex * perDay;
+                const dateDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
+                
+                return dateDecks.map(deck => deck.name);
+            }
+
+            // NOVA FUNÇÃO: Obter matérias para uma data específica
+            getDateSubjects(dateString) {
+                const activeCycle = this.getActiveCycle();
+                if (!activeCycle || !activeCycle.generatedCycle) {
+                    return [];
+                }
+                
+                // Calcular índice baseado na data (simplificado)
+                const startDate = new Date(activeCycle.startDate || dateString);
+                const targetDate = new Date(dateString + 'T00:00:00');
+                const diffTime = targetDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                const todayIndex = diffDays;
+                const materiasPorDia = this.materiasPorDia || 1;
+                let subjects = [];
+                
+                const cycleLength = activeCycle.generatedCycle.length;
+                if (cycleLength === 0) {
+                    return [];
+                }
+                
+                const adjustedIndex = todayIndex % cycleLength;
+                
+                for (let i = 0; i < materiasPorDia; i++) {
+                    const index = (adjustedIndex + i) % cycleLength;
+                    let subject = activeCycle.generatedCycle[index];
+                    
+                    if (Array.isArray(subject)) {
+                        subject = subject.join(', ');
+                    }
+                    
+                    if (subject && !subject.includes('Revisão') && !subject.includes('Simulado')) {
+                        subjects.push(subject);
+                    }
+                }
+                
+                return subjects;
             }
 
             // MODIFICAR A FUNÇÃO addDateDivider (substituir a existente)
@@ -2023,14 +2371,21 @@
             }
 
             showQuickActions() {
+                const canRegisterYesterday = this.canRegisterYesterday();
+                
                 this.addBotMessage(`
                     <div class="quick-actions">
                         <button class="action-btn primary" onclick="chatBot.showDailySummary()">
                             <i class="fas fa-calendar-day"></i> Resumo do Dia
                         </button>
                         <button class="action-btn secondary" onclick="chatBot.openRegisterModal()">
-                            <i class="fas fa-plus-circle"></i> Registrar
+                            <i class="fas fa-plus-circle"></i> Registrar Hoje
                         </button>
+                        ${canRegisterYesterday ? `
+                        <button class="action-btn yesterday" onclick="chatBot.openRegisterModal('${this.getYesterdayDateString()}')">
+                            <i class="fas fa-history"></i> Registrar Ontem
+                        </button>
+                        ` : ''}
                         <button class="action-btn info" onclick="chatBot.showEditalMenu()">
                             <i class="fas fa-file-alt"></i> Edital
                         </button>
@@ -2760,44 +3115,6 @@
                 document.getElementById('registerModal').style.display = 'none';
             }
 
-            loadTodayTasks() {
-                const modalBody = document.getElementById('registerModalBody');
-                modalBody.innerHTML = '';
-                
-                const todayTasks = this.getTodayTasks();
-                
-                if (todayTasks.questoes.length === 0 && todayTasks.anki.length === 0 && todayTasks.teoria.length === 0) {
-                    modalBody.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-check-circle"></i>
-                            <h3>Não há tarefas pendentes para hoje!</h3>
-                            <p>Parabéns! Você já concluiu todas as tarefas de hoje ou não há atividades programadas.</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                let tasksHTML = '<div class="tasks-grid">';
-                
-                // Adicionar cards para questões (apenas as do dia)
-                todayTasks.questoes.forEach(questao => {
-                    tasksHTML += this.createQuestaoCard(questao);
-                });
-                
-                // Adicionar cards para Anki
-                todayTasks.anki.forEach(deck => {
-                    tasksHTML += this.createAnkiCard(deck);
-                });
-                
-                // Adicionar cards para teoria - COM MÚLTIPLAS MATÉRIAS
-                todayTasks.teoria.forEach(materia => {
-                    tasksHTML += this.createTeoriaCard(materia);
-                });
-                
-                tasksHTML += '</div>';
-                modalBody.innerHTML = tasksHTML;
-            }
-
             createQuestaoCard(questao) {
                 return `
                     <div class="task-card" data-type="questoes" data-id="${questao.id}">
@@ -2878,6 +3195,7 @@
                 `;
             }
 
+            // FUNÇÃO MODIFICADA: saveAllTasks com suporte a datas específicas
             saveAllTasks() {
                 const cards = document.querySelectorAll('.task-card');
                 let hasError = false;
@@ -2959,36 +3277,56 @@
                     return;
                 }
 
-                // Salvar a data do último registro
-                const hoje = new Date();
-                const hojeStr = hoje.toISOString().split('T')[0];
-                localStorage.setItem('lastRegisterDate', hojeStr);
+                // SALVAMENTO COM SUPORTE A DATAS ESPECÍFICAS
+                const targetDate = this.currentViewDate;
+                
+                // Salvar a data do último registro (apenas se for o dia atual)
+                if (!this.isRetroactiveMode) {
+                    localStorage.setItem('lastRegisterDate', targetDate);
+                }
                 
                 // Salvar as atividades do dia
                 const dailyActivities = {
-                    date: hojeStr,
-                    activities: activities
+                    date: targetDate,
+                    activities: activities,
+                    registeredAt: new Date().toISOString(),
+                    isRetroactive: this.isRetroactiveMode
                 };
-                localStorage.setItem('dailyActivities', JSON.stringify(dailyActivities));
+                
+                // Para registros retroativos, usar uma chave específica
+                const activitiesKey = this.isRetroactiveMode ? 
+                    `dailyActivities_${targetDate}` : 'dailyActivities';
+                localStorage.setItem(activitiesKey, JSON.stringify(dailyActivities));
 
                 this.closeRegisterModal();
                 
                 if (savedCount > 0) {
-                    this.showRegistrationSummary(savedCount, totalTime, activities);
+                    this.showRegistrationSummary(savedCount, totalTime, activities, targetDate);
                 }
+                
+                // Limpar modo retroativo
+                this.isRetroactiveMode = false;
+                this.currentViewDate = this.getDynamicDateString();
             }
 
-            showRegistrationSummary(savedCount, totalTime, activities) {
-                // Mensagem de sucesso destacada
+            // FUNÇÃO MODIFICADA: showRegistrationSummary com suporte a datas
+            showRegistrationSummary(savedCount, totalTime, activities, targetDate) {
+                const dateObj = new Date(targetDate + 'T00:00:00');
+                const dataFormatada = this.formatDynamicDate(dateObj);
+                
+                const isYesterday = targetDate === this.getYesterdayDateString();
+                const timePrefix = isYesterday ? "ontem" : "hoje";
+
                 const successMessage = `
                     <div class="message-bubble bot-bubble message-alert-success">
                         <div class="message-content">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
                                 <i class="fas fa-check-circle" style="color: var(--success)"></i>
-                                <strong>${savedCount} atividade(s) registrada(s) com sucesso!</strong>
+                                <strong>${savedCount} atividade(s) registrada(s) para ${timePrefix}!</strong>
                             </div>
                             <div class="message-text">
-                                Seu progresso foi salvo e suas próximas revisões foram atualizadas.
+                                Seu progresso de ${dataFormatada} foi salvo com sucesso.
+                                ${isYesterday ? '<br><small>Registro retroativo concluído</small>' : ''}
                             </div>
                         </div>
                         <div class="bubble-time">${this.formatTime(new Date())}</div>
@@ -3014,7 +3352,7 @@
                         <div class="message-card">
                             <div class="message-card-header">
                                 <i class="fas fa-chart-bar"></i>
-                                <div class="message-card-title">Resumo das Atividades de Hoje</div>
+                                <div class="message-card-title">Resumo das Atividades - ${dataFormatada}</div>
                             </div>
                             <div class="message-card-content">
                     `;
