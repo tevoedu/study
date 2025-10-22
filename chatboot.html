@@ -6,7 +6,6 @@
     <title>StudyFlow - ChatBot Central</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Todo o CSS existente permanece exatamente igual */
         :root {
             --primary: #25D366;
             --primary-dark: #128C7E;
@@ -336,8 +335,6 @@
             transform: scale(1.05);
         }
 
-        /* MELHORIAS PARA AS MENSAGENS */
-        
         .message-content {
             display: flex;
             flex-direction: column;
@@ -1002,6 +999,49 @@
                 this.initChat();
                 this.initEventListeners();
                 this.showWelcomeMessage();
+                
+                // Atualizar automaticamente o índice do Anki se necessário
+                this.updateAnkiBlockIndex();
+            }
+
+            // NOVA FUNÇÃO: Atualizar automaticamente o blockIndex do Anki quando a data muda
+            updateAnkiBlockIndex() {
+                const ankiData = this.getModuleData('ciclos_focus_v1');
+                if (!ankiData || !ankiData.decks) return;
+
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0]; // YYYY-MM-DD
+                
+                // Se não houver lastAdvanced, inicializar com hoje e não avançar
+                if (!ankiData.lastAdvanced) {
+                    ankiData.lastAdvanced = hojeStr;
+                    this.setModuleData('ciclos_focus_v1', ankiData);
+                    return;
+                }
+
+                // Se a data do último avanço for igual a hoje, não fazer nada
+                if (ankiData.lastAdvanced === hojeStr) return;
+
+                // Calcular a diferença em dias
+                const ultimaData = new Date(ankiData.lastAdvanced);
+                const diffTempo = hoje.getTime() - ultimaData.getTime();
+                const diffDias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+
+                // Se passou pelo menos um dia
+                if (diffDias > 0) {
+                    // Número total de blocos (ceil(totalDeck / perDay))
+                    const perDay = ankiData.perDay || 3;
+                    const totalDecks = ankiData.decks.length;
+                    const totalBlocks = Math.ceil(totalDecks / perDay);
+
+                    // Avançar um bloco por dia que passou
+                    ankiData.blockIndex = (ankiData.blockIndex + diffDias) % totalBlocks;
+                    ankiData.lastAdvanced = hojeStr;
+
+                    this.setModuleData('ciclos_focus_v1', ankiData);
+                    
+                    console.log(`Anki: Avançado ${diffDias} dia(s). Novo blockIndex: ${ankiData.blockIndex}`);
+                }
             }
 
             initTheme() {
@@ -1516,10 +1556,6 @@
                     alert('Por favor, informe um número entre 1 e 5.');
                 }
             }
-
-            // [TODO O RESTO DO CÓDIGO PERMANECE EXATAMENTE IGUAL]
-            // Funções de utilitário, Simulados, Edital, Registrar, etc.
-            // ... (todo o resto do código permanece inalterado)
 
             addMessageToChat(content, isUser = false, timestamp = null, messageId = null) {
                 // Verificar se a mensagem já foi exibida (evitar duplicação)
@@ -2663,7 +2699,11 @@
                 modalBody.innerHTML = tasksHTML;
             }
 
+            // MODIFICAÇÃO: Atualizar a função getTodayTasks para garantir que o índice do Anki está correto
             getTodayTasks() {
+                // Primeiro, garantir que o índice do Anki está atualizado
+                this.updateAnkiBlockIndex();
+                
                 const hoje = new Date();
                 const hojeStr = hoje.toISOString().split('T')[0];
                 const tasks = {
@@ -2688,6 +2728,8 @@
                         nome: deck.name,
                         emoji: deck.emoji
                     }));
+                    
+                    console.log(`Anki: Baralhos para hoje (índice ${blockIndex}):`, todayDecks.map(d => d.name));
                 }
 
                 // Buscar matérias de teoria para hoje (ciclo teórico) - COM MÚLTIPLAS MATÉRIAS
@@ -3601,17 +3643,20 @@
                 return subjects;
             }
 
+            // MODIFICAÇÃO: Atualizar a função getTodayDecks para garantir que o índice do Anki está correto
             getTodayDecks() {
+                // Primeiro, garantir que o índice do Anki está atualizado
+                this.updateAnkiBlockIndex();
+                
                 const ankiData = this.getModuleData('ciclos_focus_v1');
                 if (!ankiData || !ankiData.decks || !ankiData.perDay) return [];
-                
+
                 const perDay = ankiData.perDay;
                 const blockIndex = ankiData.blockIndex || 0;
-                
-                // Simular quais baralhos devem ser revisados hoje
+
                 const startIndex = blockIndex * perDay;
                 const todayDecks = ankiData.decks.slice(startIndex, startIndex + perDay);
-                
+
                 return todayDecks.map(deck => deck.name);
             }
 
