@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Educacional - Sistema Completo</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --bg-card: rgba(30, 41, 59, 0.8);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --bg-glass-dark: rgba(15, 23, 42, 0.9);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --border-radius: 16px;
+      --border-radius-sm: 8px;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    /* Animações globais */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+    }
+
+    .fade-in {
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+
+    .fade-out {
+      animation: fadeOut var(--transition-normal) forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft var(--transition-normal) forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight var(--transition-normal) forwards;
+    }
+
+    /* Animação de entrada - CORRIGIDA */
+    #entryAnimation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 5000;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 25%);
+      backdrop-filter: blur(10px);
+    }
+    
+    .entry-logo {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: float 3s ease-in-out infinite, fadeIn 1s ease-out forwards;
+      filter: drop-shadow(0 5px 15px rgba(59, 130, 246, 0.3));
+    }
+    
+    .entry-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: fadeIn 1s ease-out 0.3s forwards;
+      opacity: 0;
+      text-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
+    }
+    
+    .entry-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 1s ease-out 0.6s forwards;
+      opacity: 0;
+    }
+    
+    .entry-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Tela de ativação */
+    #activationScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      background: var(--bg-glass-dark);
+      backdrop-filter: blur(10px);
+    }
+    
+    .activation-card {
+      background: var(--bg-card);
+      border-radius: var(--border-radius);
+      padding: 3rem;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(15px);
+      animation: fadeIn 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .activation-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-gradient);
+    }
+    
+    .activation-card h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    
+    .activation-card h1 i {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .activation-card p {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    
+    .activation-form {
+      margin: 2rem 0;
+    }
+    
+    .key-input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: var(--border-radius-sm);
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .key-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .activate-btn {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-md);
+      letter-spacing: 0.5px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .activate-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .activate-btn:hover::before {
+      left: 100%;
+    }
+    
+    .activate-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .activate-btn:active {
+      transform: translateY(0);
+    }
+    
+    .activation-message {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: var(--border-radius-sm);
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .activation-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success-color);
+      color: #a7f3d0;
+    }
+    
+    .activation-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--error-color);
+      color: #fecaca;
+    }
+    
+    /* Painel de administração */
+    #adminPanel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      z-index: 3000;
+      display: none;
+      padding: 2rem;
+      overflow-y: auto;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+    }
+    
+    .admin-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .admin-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .admin-header h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    
+    .admin-header h2 i {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .admin-header p {
+      color: var(--text-secondary);
+    }
+    
+    .admin-section {
+      margin-bottom: 2.5rem;
+      background: rgba(30, 41, 59, 0.6);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      animation: slideInLeft 0.5s ease-out;
+    }
+    
+    .admin-section:nth-child(even) {
+      animation: slideInRight 0.5s ease-out;
+    }
+    
+    .admin-section h3 {
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .admin-section h3 i {
+      color: var(--accent-primary);
+    }
+    
+    .keys-list {
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 1rem;
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .key-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color var(--transition-fast);
+    }
+    
+    .key-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .key-item:last-child {
+      border-bottom: none;
+    }
+    
+    .key-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .key-actions button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      padding: 0.5rem;
+      border-radius: var(--border-radius-sm);
+    }
+    
+    .key-actions button:hover {
+      color: var(--error-color);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .json-upload {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .json-upload input[type="file"] {
+      display: none;
+    }
+    
+    .upload-btn {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px dashed var(--accent-primary);
+      color: var(--accent-primary);
+      padding: 1.25rem;
+      border-radius: var(--border-radius-sm);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .upload-btn:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .admin-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    
+    .admin-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius-sm);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .admin-btn.primary {
+      background: var(--accent-gradient);
+      color: white;
+    }
+    
+    .admin-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+    
+    .admin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* Estilos para o hub principal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100%;
+      background-color: var(--bg-secondary);
+      padding: 1.5rem;
+      z-index: 1000;
+      transition: transform var(--transition-normal), width var(--transition-normal);
+      box-shadow: var(--shadow-lg);
+      display: none;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.minimized {
+      width: 70px;
+    }
+
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-btn:hover {
+      background: var(--bg-glass);
+      transform: scale(1.1);
+    }
+
+    .panel-title {
+      margin-left: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      transition: opacity var(--transition-normal);
+      color: var(--text-primary);
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .modal.minimized .panel-title {
+      opacity: 0;
+    }
+
+    .menu {
+      list-style: none;
+      flex-grow: 1;
+    }
+
+    .menu li {
+      margin: 0.5rem 0;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--text-secondary);
+      border-radius: var(--border-radius-sm);
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu li a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--accent-gradient);
+      opacity: 0.1;
+      transition: left var(--transition-normal);
+    }
+
+    .menu li a:hover::before,
+    .menu li a:focus::before,
+    .menu li a.active::before {
+      left: 0;
+    }
+
+    .menu li a:hover,
+    .menu li a:focus {
+      color: var(--text-primary);
+      transform: translateX(5px);
+    }
+
+    .menu li a.active {
+      color: var(--text-primary);
+      background: var(--bg-glass);
+    }
+
+    .menu li a i {
+      width: 24px;
+      text-align: center;
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      transition: transform var(--transition-normal);
+    }
+
+    .menu li a:hover i,
+    .menu li a.active i {
+      transform: scale(1.2);
+    }
+
+    .menu li a span {
+      transition: opacity var(--transition-normal);
+      font-weight: 500;
+    }
+
+    .modal.minimized .menu li a span {
+      opacity: 0;
+    }
+
+    .content {
+      flex: 1;
+      margin-left: 280px;
+      height: 100vh;
+      transition: margin-left var(--transition-normal);
+      position: relative;
+      display: none;
+      z-index: 100;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 25%);
+    }
+
+    .content.minimized {
+      margin-left: 70px;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 10;
+    }
+
+    .loader.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg-primary);
+    }
+
+    .notification {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      z-index: 10000;
+      transform: translateX(150%);
+      transition: transform var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-left: 4px solid var(--accent-primary);
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      border-left-color: var(--success-color);
+    }
+    
+    .notification.error {
+      border-left-color: var(--error-color);
+    }
+    
+    .notification i {
+      font-size: 1.25rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Botão para voltar ao hub */
+    .back-to-hub {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1010;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+    
+    .back-to-hub:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Animação especial para o painel admin */
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    
+    .admin-access-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      z-index: 4000;
+      display: none;
+      animation: pulse-glow 2s infinite;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-lg);
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .admin-access-indicator i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    /* Animação de carregamento (pré-hub) - ATUALIZADA */
+    #preloader-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      z-index: 9999;
+      display: none;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 25%);
+    }
+
+    /* wrapper geral */
+    #loader-wrapper {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(5px);
+    }
+
+    /* card central - aumentado */
+    .loader-card {
+      background: var(--bg-card);
+      padding: 3rem 2.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      width: 90%;
+      max-width: 600px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    /* ícone grande com animação - maior e proporcional */
+    .loader-icon {
+      width: 200px;
+      height: 200px;
+      margin-bottom: 2rem;
+      animation: float 3s ease-in-out infinite, pulse 2s ease-in-out infinite;
+      object-fit: contain;
+      border-radius: var(--border-radius);
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+    }
+
+    /* barra de progresso com efeito shine - maior */
+    .loader-bar {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .loader-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent-gradient);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .loader-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: skewX(-20deg);
+      animation: shine 1.2s ease-in-out infinite;
+    }
+    @keyframes shine {
+      0%   { left: -50%; }
+      100% { left: 150%; }
+    }
+    
+    /* Efeito de brilho adicional */
+    .loader-icon::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+      animation: glow 2s ease-in-out infinite alternate;
+      border-radius: var(--border-radius);
+      z-index: -1;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .modal {
+        width: 100%;
+        transform: translateX(-100%);
+      }
+      
+      .modal.active {
+        transform: translateX(0);
+      }
+      
+      .content {
+        margin-left: 0;
+      }
+      
+      .content.minimized {
+        margin-left: 0;
+      }
+      
+      .activation-card,
+      .admin-container {
+        padding: 2rem 1.5rem;
+      }
+      
+      .entry-title {
+        font-size: 2.5rem;
+      }
+      
+      .entry-logo {
+        font-size: 4rem;
+      }
+    }
+    
+    /* Efeitos de glassmorphism */
+    .glass {
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .glass-dark {
+      background: var(--bg-glass-dark);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Animação de entrada -->
+  <div id="entryAnimation">
+    <div class="entry-particles" id="entryParticles"></div>
+    <div class="entry-logo">
+      <i class="fas fa-graduation-cap"></i>
+    </div>
+    <h1 class="entry-title">Hub Educacional</h1>
+    <p class="entry-subtitle">Conhecimento organizado, aprendizado acelerado</p>
+  </div>
+  
+  <!-- Tela de ativação -->
+  <div id="activationScreen">
+    <div class="activation-card glass">
+      <h1><i class="fas fa-key"></i> Ativação Necessária</h1>
+      <p>Insira sua chave de licença para acessar o conteúdo premium</p>
+      
+      <div class="activation-form">
+        <input type="text" id="activationKey" class="key-input" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" autocomplete="off">
+        <button id="activateButton" class="activate-btn">
+          <i class="fas fa-lock-open"></i> Validar Licença
+        </button>
+      </div>
+      
+      <div id="activationMessage" class="activation-message">
+        <i class="fas fa-info-circle"></i> <span id="messageText"></span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Painel de Administração Secreto -->
+  <div id="adminPanel">
+    <div class="back-to-hub" onclick="closeAdminPanel()">
+      <i class="fas fa-arrow-left"></i>
+    </div>
+    
+    <div class="admin-container glass">
+      <div class="admin-header">
+        <h2><i class="fas fa-user-shield"></i> Painel do Desenvolvedor</h2>
+        <p>Gerenciamento de chaves de ativação</p>
+      </div>
+      
+      <div class="admin-section glass-dark">
+        <h3><i class="fas fa-key"></i> Chaves Ativas</h3>
+        <div class="keys-list" id="activeKeysList">
+          <!-- As chaves serão carregadas dinamicamente aqui -->
+        </div>
+      </div>
+      
+      <div class="admin-section glass-dark">
+        <h3><i class="fas fa-file-upload"></i> Atualizar Chaves</h3>
+        <p>Faça upload de um arquivo JSON com novas chaves:</p>
+        
+        <div class="json-upload">
+          <input type="file" id="jsonFileInput" accept=".json">
+          <label for="jsonFileInput" class="upload-btn">
+            <i class="fas fa-cloud-upload-alt"></i> Selecione o arquivo JSON
+          </label>
+          <span id="fileName">Nenhum arquivo selecionado</span>
+          
+          <div class="admin-actions">
+            <button class="admin-btn primary" onclick="updateKeys()">
+              <i class="fas fa-sync-alt"></i> Atualizar Chaves
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="admin-section glass-dark">
+        <h3><i class="fas fa-info-circle"></i> Formato do Arquivo</h3>
+        <p>O arquivo JSON deve conter um array de strings com as chaves:</p>
+        <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--border-radius-sm); margin-top: 1rem; overflow: auto; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
+[
+  "A3B9C8D2E1F7G6H4",
+  "K5L2M9N8P3Q7R1S4",
+  "T9U1V4W7X2Y5Z3J8"
+]</pre>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Indicador de acesso ao painel admin -->
+  <div class="admin-access-indicator glass" id="adminAccessIndicator">
+    <i class="fas fa-user-shield"></i>
+    <h2>Acesso ao Painel Admin Concedido!</h2>
+    <p>Carregando configurações...</p>
+  </div>
+  
+  <!-- Animação de carregamento (pré-hub) - ATUALIZADA -->
+  <div id="preloader-animation">
+    <div id="loader-wrapper">
+      <div class="loader-card glass">
+        <!-- Ícone personalizado na pasta img -->
+        <img src="img/icone.png" class="loader-icon" alt="Ícone do Estudante" onerror="this.style.display='none'" />
+        <div class="loader-bar">
+          <div class="loader-fill" id="loader-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo principal (visível apenas após ativação) -->
+  <nav class="modal glass" id="modalMenu" aria-label="Menu principal">
+    <div class="modal-content">
+      <div class="header">
+        <button class="toggle-btn" aria-label="Alternar menu" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="panel-title">Painel</span>
+      </div>
+      <ul class="menu">
+        <li><a href="#home" data-title="Home" onclick="loadContent('home')" class="active">
+          <i class="fas fa-home"></i><span>Home</span>
+        </a></li>
+        <li><a href="#chatboot" data-title="Chatboot" onclick="loadContent('chatboot')">
+          <i class="fas fa-robot"></i><span>Chatboot</span>
+        </a></li>
+        <li><a href="#planos" data-title="Planos" onclick="loadContent('planos')">
+          <i class="fas fa-th-large"></i><span>Planos</span>
+        </a></li>
+        <li><a href="#revisoes" data-title="Revisões" onclick="loadContent('revisoes')">
+          <i class="fas fa-sync-alt"></i><span>Revisões</span>
+        </a></li>
+        <li><a href="#flashcards" data-title="Flashcards" onclick="loadContent('flashcards')">
+          <i class="fas fa-layer-group"></i><span>Flashcards</span>
+        </a></li>
+        <!-- Botão Anki adicionado aqui -->
+        <li><a href="#anki" data-title="Anki" onclick="loadContent('anki')">
+          <i class="fas fa-clone"></i><span>Anki</span>
+        </a></li>
+        <li><a href="#simulados" data-title="Simulados" onclick="loadContent('simulados')">
+          <i class="fas fa-clipboard-check"></i><span>Simulados</span>
+        </a></li>
+        <li><a href="#edital" data-title="Edital Verticalizado" onclick="loadContent('edital')">
+          <i class="fas fa-file-alt"></i><span>Edital Verticalizado</span>
+        </a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="content" id="contentArea">
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+    <!-- Permissões liberadas removendo o atributo sandbox -->
+    <iframe id="iframeContent" src="home.html" onload="hideLoader()"></iframe>
+  </main>
+
+  <div id="notification" class="notification glass">
+    <i class="fas fa-check-circle"></i>
+    <span></span>
+  </div>
+
+  <script>
+    // Sistema de ativação offline com painel de administração secreto
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM carregado - Iniciando sistema...');
+      
+      // Criar partículas para a animação de entrada
+      createParticles();
+      
+      // Verifica se o sistema já está ativado
+      if (isSystemActivated()) {
+        console.log('Sistema já ativado - Pulando ativação');
+        // Se já estiver ativado, esconde a animação de entrada após um tempo
+        setTimeout(() => {
+          document.getElementById('entryAnimation').classList.add('fade-out');
+          setTimeout(() => {
+            document.getElementById('entryAnimation').style.display = 'none';
+            
+            // Verifica se deve mostrar a animação de carregamento
+            if (sessionStorage.getItem("hubLoaded")) {
+              console.log('Hub já carregado anteriormente - Ativando sistema');
+              activateSystem();
+            } else {
+              console.log('Mostrando animação de carregamento');
+              // Mostra a animação antes do hub
+              document.getElementById('preloader-animation').style.display = 'flex';
+              startLoaderAnimation();
+            }
+          }, 500);
+        }, 1000);
+      } else {
+        console.log('Sistema não ativado - Mostrando tela de ativação');
+        // Mostra a tela de ativação após a animação de entrada
+        setTimeout(() => {
+          document.getElementById('entryAnimation').classList.add('fade-out');
+          setTimeout(() => {
+            document.getElementById('entryAnimation').style.display = 'none';
+            document.getElementById('activationScreen').style.display = 'flex';
+            setTimeout(() => {
+              document.getElementById('activationScreen').classList.add('fade-in');
+            }, 50);
+            setupActivationListeners();
+          }, 500);
+        }, 3000);
+      }
+      
+      // Configura o listener para upload de arquivo
+      document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+          document.getElementById('fileName').textContent = this.files[0].name;
+        }
+      });
+    });
+
+    // Função para criar partículas na animação de entrada
+    function createParticles() {
+      const container = document.getElementById('entryParticles');
+      const particleCount = 20;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Tamanho aleatório
+        const size = Math.random() * 6 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Posição aleatória
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        
+        // Cor aleatória (entre azul e roxo)
+        const hue = Math.random() * 40 + 220;
+        particle.style.background = `hsl(${hue}, 70%, 65%)`;
+        
+        // Atraso e duração da animação aleatórios
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        
+        container.appendChild(particle);
+      }
+    }
+
+    // Função para iniciar a animação de carregamento
+    function startLoaderAnimation() {
+      const fill = document.getElementById("loader-fill");
+      const preloader = document.getElementById("preloader-animation");
+
+      let start = null;
+      const duration = 2500; // 2.5s
+
+      function animate(time) {
+        if (!start) start = time;
+        const progress = Math.min((time - start) / duration, 1);
+        fill.style.width = `${progress * 100}%`;
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          console.log('Animação de carregamento concluída');
+          sessionStorage.setItem("hubLoaded", true);
+          // Esconder a animação
+          preloader.style.display = "none";
+          // Mostrar o hub principal
+          activateSystem();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    // Função para verificar se o sistema está ativado
+    function isSystemActivated() {
+      return localStorage.getItem('system_activated') === 'true';
+    }
+
+    // Configura os listeners para a tela de ativação
+    function setupActivationListeners() {
+      const activationKeyInput = document.getElementById('activationKey');
+      const activateButton = document.getElementById('activateButton');
+      
+      // Formatação automática da chave (XXXX-XXXX-XXXX-XXXX)
+      activationKeyInput.addEventListener('input', function(e) {
+        // Verifica primeiro se é o código especial de admin
+        if (this.value.toUpperCase().includes('ADMIN-ACCESS-DEV')) {
+          return;
+        }
+        
+        let value = e.target.value.replace(/-/g, '');
+        if (value.length > 0) {
+          value = value.match(new RegExp('.{1,4}', 'g')).join('-');
+        }
+        e.target.value = value;
+      });
+      
+      // Ativação ao clicar no botão
+      activateButton.addEventListener('click', validateActivationKey);
+      
+      // Ativação ao pressionar Enter
+      activationKeyInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          validateActivationKey();
+        }
+      });
+      
+      console.log('Listeners de ativação configurados');
+    }
+
+    // Função para validar a chave de ativação
+    function validateActivationKey() {
+      const activationKey = document.getElementById('activationKey').value;
+      const messageElement = document.getElementById('activationMessage');
+      const messageText = document.getElementById('messageText');
+      
+      console.log('Validando chave:', activationKey);
+      
+      // Verifica se a chave foi inserida
+      if (!activationKey) {
+        showMessage('Por favor, insira uma chave de licença', 'error');
+        return;
+      }
+      
+      // Verifica se é o código secreto para o painel admin
+      if (activationKey.toUpperCase() === 'ADMIN-ACCESS-DEV') {
+        console.log('Código de admin detectado');
+        showAdminAccessIndicator();
+        return;
+      }
+      
+      // Remove hífens para validação
+      const cleanKey = activationKey.replace(/-/g, '');
+      
+      // Verifica o formato da chave
+      if (cleanKey.length !== 16 || !/^[A-Z0-9]{16}$/.test(cleanKey)) {
+        showMessage('Formato de chave inválido', 'error');
+        return;
+      }
+      
+      // Simula uma pequena espera para o processo de verificação
+      showMessage('Verificando licença...', 'info');
+      
+      setTimeout(() => {
+        // Verifica se a chave é válida
+        if (isValidKey(cleanKey)) {
+          console.log('Chave válida - Ativando sistema');
+          // Armazena o estado de ativação
+          localStorage.setItem('system_activated', 'true');
+          // Armazena a chave de forma segura
+          storeActivationKey(cleanKey);
+          showMessage('Licença validada com sucesso!', 'success');
+          showNotification('Sistema ativado com sucesso!', 'success');
+          
+          // Esconde a tela de ativação
+          document.getElementById('activationScreen').classList.add('fade-out');
+          setTimeout(() => {
+            document.getElementById('activationScreen').style.display = 'none';
+            
+            // Verifica se deve mostrar a animação
+            if (sessionStorage.getItem("hubLoaded")) {
+              activateSystem();
+            } else {
+              // Mostra a animação antes do hub
+              document.getElementById('preloader-animation').style.display = 'flex';
+              startLoaderAnimation();
+            }
+          }, 500);
+        } else {
+          showMessage('Chave de licença inválida', 'error');
+        }
+      }, 800);
+    }
+
+    // Função para mostrar mensagens na tela de ativação
+    function showMessage(text, type) {
+      const messageElement = document.getElementById('activationMessage');
+      const messageText = document.getElementById('messageText');
+      
+      messageText.textContent = text;
+      messageElement.className = 'activation-message';
+      messageElement.style.display = 'flex';
+      
+      if (type === 'error') {
+        messageElement.classList.add('activation-error');
+      } else if (type === 'success') {
+        messageElement.classList.add('activation-success');
+      }
+    }
+
+    // Função para ativar o sistema (mostrar o hub)
+    function activateSystem() {
+      console.log('Ativando sistema principal...');
+      const modalMenu = document.getElementById("modalMenu");
+      const contentArea = document.getElementById("contentArea");
+      
+      // Garantir que a tela de ativação esteja oculta
+      document.getElementById('activationScreen').style.display = 'none';
+      
+      // Mostra o sistema principal
+      modalMenu.style.display = 'block';
+      contentArea.style.display = 'block';
+      
+      // Configura o sistema principal
+      setupMainSystem();
+      
+      console.log('Sistema principal ativado com sucesso');
+    }
+
+    // Função para verificar se uma chave é válida
+    function isValidKey(key) {
+      // Carrega as chaves válidas do localStorage ou usa as padrão
+      let validKeys = [];
+      
+      try {
+        const storedKeys = localStorage.getItem('valid_keys');
+        if (storedKeys) {
+          validKeys = JSON.parse(storedKeys);
+        } else {
+          // Chaves padrão
+          validKeys = [
+            'A3B9C8D2E1F7G6H4', 
+            'K5L2M9N8P3Q7R1S4', 
+            'T9U1V4W7X2Y5Z3J8',
+            'B2C8D4E6F1G9H3J7',
+            'M5N9P2Q8R3S7T1U4'
+          ];
+          localStorage.setItem('valid_keys', JSON.stringify(validKeys));
+        }
+      } catch (e) {
+        console.error('Erro ao carregar chaves válidas', e);
+      }
+      
+      return validKeys.includes(key);
+    }
+
+    // Função para armazenar a chave de forma segura
+    function storeActivationKey(key) {
+      localStorage.setItem('activation_key', btoa(key));
+    }
+
+    // Configura o sistema principal após ativação
+    function setupMainSystem() {
+      const savedState = localStorage.getItem('menuState');
+      const modal = document.getElementById('modalMenu');
+
+      if (savedState === 'minimized') {
+        modal.classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+      
+      // Para dispositivos móveis, adicionar toggle ao menu
+      if (window.innerWidth <= 768) {
+        modal.classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+      
+      console.log('Sistema principal configurado');
+    }
+
+    // Funções do sistema principal
+    function toggleSidebar() {
+      const modal = document.getElementById('modalMenu');
+      const content = document.getElementById('contentArea');
+
+      modal.classList.toggle('minimized');
+      content.classList.toggle('minimized');
+
+      const newState = modal.classList.contains('minimized') ? 'minimized' : 'expanded';
+      localStorage.setItem('menuState', newState);
+    }
+
+    function loadContent(page) {
+      console.log('Carregando conteúdo:', page);
+      const iframe = document.getElementById('iframeContent');
+      const loader = document.getElementById('loader');
+      const links = document.querySelectorAll('.menu li a');
+
+      loader.classList.add('active');
+
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${page}`) {
+          link.classList.add('active');
+        }
+      });
+
+      iframe.src = `${page}.html`;
+      
+      // Para dispositivos móveis, fechar o menu após selecionar uma opção
+      if (window.innerWidth <= 768) {
+        toggleSidebar();
+      }
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.remove('active');
+    }
+    
+    // Função para mostrar notificação
+    function showNotification(message, type) {
+      const notification = document.getElementById('notification');
+      const icon = notification.querySelector('i');
+      const text = notification.querySelector('span');
+      
+      text.textContent = message;
+      notification.className = `notification ${type} glass`;
+      
+      // Configurar ícone correto
+      if (type === 'success') {
+        icon.className = 'fas fa-check-circle';
+      } else {
+        icon.className = 'fas fa-exclamation-circle';
+      }
+      
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Mostrar indicador de acesso ao admin
+    function showAdminAccessIndicator() {
+      console.log('Mostrando indicador de acesso admin');
+      const indicator = document.getElementById('adminAccessIndicator');
+      indicator.style.display = 'block';
+      
+      setTimeout(() => {
+        indicator.style.opacity = '0';
+        indicator.style.transform = 'scale(0.9)';
+        
+        setTimeout(() => {
+          indicator.style.display = 'none';
+          openAdminPanel();
+        }, 500);
+      }, 1500);
+    }
+    
+    // Abrir painel de administração
+    function openAdminPanel() {
+      console.log('Abrindo painel de administração');
+      document.getElementById('activationScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadActiveKeys();
+    }
+    
+    // Fechar painel de administração
+    function closeAdminPanel() {
+      console.log('Fechando painel de administração');
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('activationScreen').style.display = 'flex';
+      document.getElementById('activationKey').value = '';
+      document.getElementById('activationMessage').style.display = 'none';
+    }
+    
+    // Carregar chaves ativas no painel admin
+    function loadActiveKeys() {
+      const keysList = document.getElementById('activeKeysList');
+      keysList.innerHTML = '';
+      
+      try {
+        const storedKeys = localStorage.getItem('valid_keys');
+        let validKeys = [];
+        
+        if (storedKeys) {
+          validKeys = JSON.parse(storedKeys);
+        }
+        
+        if (validKeys.length === 0) {
+          keysList.innerHTML = '<div class="key-item">Nenhuma chave cadastrada</div>';
+          return;
+        }
+        
+        validKeys.forEach(key => {
+          const keyElement = document.createElement('div');
+          keyElement.className = 'key-item';
+          keyElement.innerHTML = `
+            <div class="key-value">${formatKey(key)}</div>
+            <div class="key-actions">
+              <button onclick="removeKey('${key}')"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          `;
+          keysList.appendChild(keyElement);
+        });
+      } catch (e) {
+        keysList.innerHTML = '<div class="key-item">Erro ao carregar chaves</div>';
+        console.error('Erro ao carregar chaves', e);
+      }
+    }
+    
+    // Formatar chave para exibição
+    function formatKey(key) {
+      return key.match(/.{1,4}/g).join('-');
+    }
+    
+    // Remover uma chave
+    function removeKey(key) {
+      try {
+        const storedKeys = localStorage.getItem('valid_keys');
+        let validKeys = [];
+        
+        if (storedKeys) {
+          validKeys = JSON.parse(storedKeys);
+        }
+        
+        // Remove a chave
+        validKeys = validKeys.filter(k => k !== key);
+        localStorage.setItem('valid_keys', JSON.stringify(validKeys));
+        
+        // Recarrega a lista
+        loadActiveKeys();
+        showNotification('Chave removida com sucesso', 'success');
+      } catch (e) {
+        console.error('Erro ao remover chave', e);
+        showNotification('Erro ao remover chave', 'error');
+      }
+    }
+    
+    // Atualizar chaves a partir de arquivo JSON
+    function updateKeys() {
+      const fileInput = document.getElementById('jsonFileInput');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showNotification('Selecione um arquivo JSON', 'error');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          const newKeys = JSON.parse(e.target.result);
+          
+          // Valida se é um array de strings
+          if (!Array.isArray(newKeys)) {
+            throw new Error('O arquivo deve conter um array de chaves');
+          }
+          
+          for (const key of newKeys) {
+            if (typeof key !== 'string' || key.length !== 16) {
+              throw new Error(`Chave inválida: ${key}`);
+            }
+          }
+          
+          // Salva as novas chaves
+          localStorage.setItem('valid_keys', JSON.stringify(newKeys));
+          loadActiveKeys();
+          showNotification('Chaves atualizadas com sucesso!', 'success');
+          document.getElementById('fileName').textContent = 'Nenhum arquivo selecionado';
+          fileInput.value = '';
+        } catch (e) {
+          console.error('Erro ao processar arquivo JSON', e);
+          showNotification(`Erro: ${e.message}`, 'error');
+        }
+      };
+      
+      reader.onerror = function() {
+        showNotification('Erro ao ler o arquivo', 'error');
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // Adicionar evento de redimensionamento para responsividade
+    window.addEventListener('resize', function() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('modalMenu').classList.add('minimized');
+        document.getElementById('contentArea').classList.add('minimized');
+      }
+    });
+    
+    // Fallback para garantir que o sistema não trave
+    window.addEventListener('error', function(e) {
+      console.error('Erro capturado:', e.error);
+      // Tentar recuperar mostrando a tela de ativação
+      document.getElementById('entryAnimation').style.display = 'none';
+      document.getElementById('activationScreen').style.display = 'flex';
+    });
+  </script>
+</body>
+</html>
